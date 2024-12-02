@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, abort
 from models import db, User
+import os
 
 # * 포트 포워딩 정보
 #   - 113.198.66.67:10xxx -> 10.0.0.xxx:8080
@@ -10,7 +11,7 @@ from models import db, User
 #   - 위 포트 외는 방화벽으로 차단되어 있습니다.
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://rkdbq:Kang1293!!@localhost:3000/wsd3_db"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@localhost:3000/wsd3_db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
