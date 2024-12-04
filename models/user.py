@@ -6,19 +6,19 @@ db = SQLAlchemy()
 class User(db.Model):
     """
     사용자 정보 모델:
-        사용자 이름: String
+        이메일: String
         가입 유형: String
         해싱된 비밀번호: String
     """
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(50), nullable=False)
     usertype = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(50), nullable=False)
     
     def to_dict(self):
         return {
             'id': self.id,
-            'username': self.username,
+            'email': self.email,
             'usertype': self.usertype,
             'password': self.password,
         }
