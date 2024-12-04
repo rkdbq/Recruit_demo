@@ -157,6 +157,7 @@ def add_job():
         abort(400)
 
     job_posting = JobPosting(
+        title=request.json['title'],
         location=request.json['location'],
         experience=request.json['experience'],
         salary=request.json['salary'],
@@ -164,7 +165,6 @@ def add_job():
         company_id=request.json['company_id'],
         position=request.json['position'],
         views=request.json['views'],
-        details=request.json['details'],
     )
     
     # 채용 공고 저장

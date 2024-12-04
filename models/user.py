@@ -191,6 +191,7 @@ class Company(db.Model):
 class JobPosting(db.Model):
     """
     채용 공고 모델:
+        제목: String
         지역: String
         경력: String
         급여: String (null)
@@ -201,6 +202,7 @@ class JobPosting(db.Model):
         상세정보: Text
     """
     id = db.Column(db.Integer, primary_key=True)  # 공고 아이디 (PK)
+    title = db.Column(db.String(50), nullable=False)
     location = db.Column(db.String(50), nullable=False)  # 지역
     experience = db.Column(db.String(50), nullable=False)  # 경력
     salary = db.Column(db.String(50))  # 급여
@@ -208,7 +210,6 @@ class JobPosting(db.Model):
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)  # 회사명 (FK -> 회사 아이디)
     position = db.Column(db.String(50), nullable=False)  # 포지션
     views = db.Column(db.Integer, default=0)  # 조회수
-    details = db.Column(db.Text)  # 상세정보
     
     # 회사와의 관계 설정
     company = db.relationship('Company', backref=db.backref('job_postings', lazy=True))
