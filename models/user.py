@@ -4,6 +4,12 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
         
 class User(db.Model):
+    """
+    사용자 정보 모델:
+        사용자 이름: String
+        가입 유형: String
+        해싱된 비밀번호: String
+    """
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False)
     usertype = db.Column(db.String(50), nullable=False)
@@ -18,6 +24,13 @@ class User(db.Model):
         }
         
 class Application(db.Model):
+    """
+    지원 내역 모델:
+        지원자(FK -> 사용자 아이디): Int
+        지원 상태: String
+        지원 날짜: DateTime
+        첨부 이력서: String
+    """
     id = db.Column(db.Integer, primary_key=True)  # 지원 내역 아이디 (PK)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # 지원자 (FK -> 사용자 아이디)
     status = db.Column(db.String(50), nullable=False)  # 지원 상태
@@ -37,6 +50,12 @@ class Application(db.Model):
         }
 
 class Bookmark(db.Model):
+    """
+    북마크/관심공고 모델:
+        사용자 아이디(FK -> 사용자 아이디): Integer
+        공고 아이디(FK -> 공고 아이디): Integer
+        북마크 날짜: DateTime
+    """
     id = db.Column(db.Integer, primary_key=True)  # 북마크 아이디 (PK)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # 사용자 아이디 (FK -> 사용자 아이디)
     job_posting_id = db.Column(db.Integer, db.ForeignKey('job_posting.id'), nullable=False)  # 공고 아이디 (FK -> 공고 아이디)
@@ -56,6 +75,15 @@ class Bookmark(db.Model):
         
         
 class EmployeeInterview(db.Model):
+    """
+    현직자 인터뷰 모델:
+        작성자(FK -> 사용자 아이디): Integer
+        기업(FK -> 기업 아이디): Interger
+        제목: String
+        인터뷰이: String
+        날짜: DateTime
+        조회수: Interger
+    """
     id = db.Column(db.Integer, primary_key=True)  # 인터뷰 아이디 (PK)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # 작성자 (FK -> 사용자 아이디)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)  # 기업 (FK -> 기업 아이디)
@@ -80,6 +108,12 @@ class EmployeeInterview(db.Model):
         }
 
 class EmployeeInterviewQA(db.Model):
+    """
+    현직자 인터뷰 QA 모델:
+        인터뷰 아이디(FK -> 인터뷰 아이디): Integer
+        질문: Text
+        응답: Text
+    """
     id = db.Column(db.Integer, primary_key=True)  # 질문-답변 아이디 (PK)
     interview_id = db.Column(db.Integer, db.ForeignKey('employee_interview.id'), nullable=False)  # 인터뷰 아이디 (FK -> 인터뷰 아이디)
     question = db.Column(db.Text, nullable=False)  # 질문
@@ -97,6 +131,11 @@ class EmployeeInterviewQA(db.Model):
         }
 
 class EmployeeInterviewKeyword(db.Model):
+    """
+    현직자 인터뷰 키워드 모델:
+        인터뷰 아이디(FK -> 인터뷰 아이디): Integer
+        키워드: String
+    """
     id = db.Column(db.Integer, primary_key=True)  # 인터뷰 키워드 아이디 (PK)
     interview_id = db.Column(db.Integer, db.ForeignKey('employee_interview.id'), nullable=False)  # 인터뷰 아이디 (FK -> 인터뷰 아이디)
     keyword = db.Column(db.String(50), nullable=False)  # 키워드
@@ -112,12 +151,23 @@ class EmployeeInterviewKeyword(db.Model):
         }
         
 class Company(db.Model):
+    """
+    회사 정보 모델:
+        회사명: String
+        대표자명: String (null)
+        기업형태: String
+        업종: String
+        사원수: Integer (null)
+        설립일: Date (null)
+        홈페이지: String (null)
+        기업주소: String (null)
+    """
     id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String(50), nullable=False)
     rep_name = db.Column(db.String(50))
     company_type = db.Column(db.String(50), nullable=False)
     industry = db.Column(db.String(50), nullable=False)
-    employ_num = db.Column(db.String(50))
+    employ_num = db.Column(db.Integer)
     est_date = db.Column(db.Date)
     homepage = db.Column(db.String(50))
     address = db.Column(db.String(50))
@@ -136,6 +186,17 @@ class Company(db.Model):
         }
         
 class JobPosting(db.Model):
+    """
+    채용 공고 모델:
+        지역: String
+        경력: String
+        급여: String (null)
+        기술스택: String (null)
+        회사명(FK -> 회사 아이디): Integer
+        포지션: String
+        조회수: Integer
+        상세정보: Text
+    """
     id = db.Column(db.Integer, primary_key=True)  # 공고 아이디 (PK)
     location = db.Column(db.String(50), nullable=False)  # 지역
     experience = db.Column(db.String(50), nullable=False)  # 경력
@@ -163,6 +224,11 @@ class JobPosting(db.Model):
         }
 
 class JobPostingKeyword(db.Model):
+    """
+    채용 공고 키워드 모델:
+        공고 아이디(FK -> 공고 아이디): Integer
+        키워드: String
+    """
     id = db.Column(db.Integer, primary_key=True)  # 공고 키워드 아이디 (PK)
     job_posting_id = db.Column(db.Integer, db.ForeignKey('job_posting.id'), nullable=False)  # 공고 아이디 (FK -> 공고 아이디)
     keyword = db.Column(db.String(50), nullable=False)  # 키워드

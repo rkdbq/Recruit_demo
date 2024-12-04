@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, abort
-from models import db, User
+from models.user import db, User
+
 import os
 
 # * 포트 포워딩 정보
@@ -31,7 +32,7 @@ def get_users():
     return jsonify([user.to_dict() for user in users])
 
 @app.route('/users', methods=['POST'])
-def create_student():
+def register():
     print(request.json)
 
     if not request.json or not 'username' in request.json:
@@ -39,8 +40,8 @@ def create_student():
 
     user = User(
         username=request.json['username'],
-        usertype=request.json.get('usertype', 0),
-        password=request.json.get('password', "")
+        usertype=request.json['usertype'],
+        password=request.json['password'],
     )
 
     try:
