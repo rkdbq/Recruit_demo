@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort, render_template
-from models.user import db, User
+from models.user import Company, db, User, JobPosting, Application
 
 import os, re, base64
 
@@ -35,13 +35,13 @@ def encode_password(password):
 def home():
     return "There is home"
 
-@app.route('/users', methods=['GET'])
+@app.route('/auth', methods=['GET'])
 def get_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users])
 
-@app.route('/auth/register', methods=['POST'])
-def register():
+@app.route('/auth/profile', methods=['POST'])
+def add_user():
     if not request.json or not 'email' in request.json:
         abort(400)
 
@@ -88,7 +88,7 @@ def delete_user(user_id):
     return jsonify({'message': f'User with ID {user_id} has been deleted'}), 200
 
 @app.route('/auth/profile', methods=['PUT'])
-def update_profile():
+def update_user():
     if not request.json or not 'email' in request.json:
         abort(400)
         
@@ -114,6 +114,101 @@ def update_profile():
     
     return jsonify(existing_user.to_dict()), 201
 
+@app.route('/companies', methods=['GET'])
+def get_companies():
+    companies = Company.query.all()
+    return jsonify([company.to_dict() for company in companies])
+
+@app.route('/companies', methods=['POST'])
+def add_company():
+    if not request.json:
+        abort(400)
+
+    company = Company(
+        company_name=request.json['company_name'],
+        rep_name=request.json.get('rep_name', None),
+        company_type=request.json['company_type'],
+        industry=request.json['industry'],
+        employ_num=request.json['employ_num'],
+        est_date=request.json['est_date'],
+        homepage=request.json['homepage'],
+        address=request.json['address'],
+    )
+    
+    # 채용 공고 저장
+    try:
+        db.session.add(company)
+        db.session.commit() 
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occured'}), 500
+
+    return jsonify(company.to_dict()), 201
+
+@app.route('/jobs', methods=['GET'])
+def get_jobs():
+    jobs = JobPosting.query.all()
+    return jsonify([job.to_dict() for job in jobs])
+
+@app.route('/jobs', methods=['POST'])
+def add_job():
+    if not request.json or not 'company_id' in request.json:
+        abort(400)
+
+    job_posting = JobPosting(
+        location=request.json['location'],
+        experience=request.json['experience'],
+        salary=request.json['salary'],
+        tech_stack=request.json['tech_stack'],
+        company_id=request.json['company_id'],
+        position=request.json['position'],
+        views=request.json['views'],
+        details=request.json['details'],
+    )
+    
+    # 채용 공고 저장
+    try:
+        db.session.add(job_posting)
+        db.session.commit() 
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occured'}), 500
+
+    return jsonify(job_posting.to_dict()), 201
+
+@app.route('/applications', methods=['POST'])
+def apply():
+    if not request.json or not 'job_posting_id' in request.json:
+        abort(400)
+        
+    application = Application(
+        job_posting_id=request.json['job_posting_id'],
+        user_id=request.json['user_id'],
+        status=request.json['status'],
+        applied_date=request.json['applied_date'],
+        resume=request.json.get('resume', "")
+    )
+    
+    existing_application = application.query.filter_by(job_posting_id=application.job_posting_id,
+                                                       user_id=application.user_id).first()
+    if not existing_application:
+        try:
+            db.session.add(application)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Database error occurred'}), 500
+    elif existing_application.status == "지원 취소":
+        try:
+            existing_application.status = "지원 완료"
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Database error occurred'}), 500
+        
+    return jsonify(existing_application.to_dict()), 201
 
 if __name__ == '__main__':
     app.run(

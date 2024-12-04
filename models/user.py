@@ -27,18 +27,21 @@ class Application(db.Model):
     """
     지원 내역 모델:
         지원자(FK -> 사용자 아이디): Int
+        지원 공고(FK -> 채용 공고 아이디): Int
         지원 상태: String
         지원 날짜: DateTime
         첨부 이력서: String
     """
     id = db.Column(db.Integer, primary_key=True)  # 지원 내역 아이디 (PK)
+    job_posting_id = db.Column(db.Integer, db.ForeignKey('job_posting.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # 지원자 (FK -> 사용자 아이디)
     status = db.Column(db.String(50), nullable=False)  # 지원 상태
     applied_date = db.Column(db.DateTime, nullable=False)  # 지원 날짜
-    resume = db.Column(db.String(200), nullable=True)  # 첨부 이력서 (파일 경로 저장)
+    resume = db.Column(db.String(200))  # 첨부 이력서 (파일 경로 저장)
 
-    # 사용자와의 관계 설정
+    # 사용자 및 공고와의 관계 설정
     user = db.relationship('User', backref=db.backref('applications', lazy=True))
+    job_posting = db.relationship('JobPosting', backref=db.backref('applications', lazy=True))
     
     def to_dict(self):
         return {
