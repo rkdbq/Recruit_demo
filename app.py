@@ -67,6 +67,27 @@ def register():
 
     return jsonify(user.to_dict()), 201
 
+@app.route('/auth/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """
+    회원 탈퇴 API
+    """
+    # 사용자 조회
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    try:
+        # 사용자 삭제
+        db.session.delete(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()  # 트랜잭션 롤백
+        return jsonify({'error': 'Database error occurred'}), 500
+
+    return jsonify({'message': f'User with ID {user_id} has been deleted'}), 200
+
+
 if __name__ == '__main__':
     app.run(
         debug=True,
