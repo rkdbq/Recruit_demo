@@ -1,7 +1,7 @@
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, render_template
 from models.user import db, User
 
-import os
+import os, re, base64
 
 # * 포트 포워딩 정보
 #   - 113.198.66.67:10xxx -> 10.0.0.xxx:8080
@@ -23,34 +23,47 @@ def create_tables():
 app.before_request(create_tables)
 
 @app.route("/")
-def hello():
-    return "Hello World!"
+def home():
+    return "There is home"
 
 @app.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users])
 
-@app.route('/users', methods=['POST'])
+@app.route('/auth/register', methods=['POST'])
 def register():
     print(request.json)
 
-    if not request.json or not 'username' in request.json:
+    if not request.json or not 'email' in request.json:
         abort(400)
 
     user = User(
-        username=request.json['username'],
+        email=request.json['email'],
         usertype=request.json['usertype'],
         password=request.json['password'],
     )
+    
+    # 이메일 형식 검증
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if re.match(email_regex, user.email) is None:
+        return jsonify({'error': 'Invalid email format'}), 400
+    
+    # 중복 회원 검사
+    if User.query.filter_by(email=user.email).first():
+        return jsonify({'error': 'Email already exists'}), 409
+    
+    # 비밀번호 암호화 (Base64)
+    user.password = base64.b64encode(user.password.encode('utf-8')).decode('utf-8')
 
+    # 사용자 정보 저장
     try:
         db.session.add(user)
         db.session.commit()
 
     except Exception as e:
-        print(e)
-        return jsonify({'error': 'User already exists'}), 409
+        db.session.rollback()
+        return jsonify({'error': 'Database error occured'}), 500
 
     return jsonify(user.to_dict()), 201
 
