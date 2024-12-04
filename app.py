@@ -22,6 +22,15 @@ def create_tables():
     
 app.before_request(create_tables)
 
+# 이메일 형식 검증 함수
+def is_valid_email(email):
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(email_regex, email) is not None
+
+# 비밀번호 Base64 인코딩 함수
+def encode_password(password):
+    return base64.b64encode(password.encode('utf-8')).decode('utf-8')
+
 @app.route("/")
 def home():
     return "There is home"
@@ -33,8 +42,6 @@ def get_users():
 
 @app.route('/auth/register', methods=['POST'])
 def register():
-    print(request.json)
-
     if not request.json or not 'email' in request.json:
         abort(400)
 
@@ -44,9 +51,7 @@ def register():
         password=request.json['password'],
     )
     
-    # 이메일 형식 검증
-    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if re.match(email_regex, user.email) is None:
+    if not is_valid_email(user.email):
         return jsonify({'error': 'Invalid email format'}), 400
     
     # 중복 회원 검사
@@ -54,12 +59,12 @@ def register():
         return jsonify({'error': 'Email already exists'}), 409
     
     # 비밀번호 암호화 (Base64)
-    user.password = base64.b64encode(user.password.encode('utf-8')).decode('utf-8')
+    user.password = encode_password(user.password)
 
     # 사용자 정보 저장
     try:
         db.session.add(user)
-        db.session.commit()
+        db.session.commit() 
 
     except Exception as e:
         db.session.rollback()
@@ -69,23 +74,45 @@ def register():
 
 @app.route('/auth/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    """
-    회원 탈퇴 API
-    """
-    # 사용자 조회
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
     try:
-        # 사용자 삭제
         db.session.delete(user)
         db.session.commit()
     except Exception as e:
-        db.session.rollback()  # 트랜잭션 롤백
+        db.session.rollback()
         return jsonify({'error': 'Database error occurred'}), 500
 
     return jsonify({'message': f'User with ID {user_id} has been deleted'}), 200
+
+@app.route('/auth/profile', methods=['PUT'])
+def update_profile():
+    if not request.json or not 'email' in request.json:
+        abort(400)
+        
+    user = User(
+        email=request.json['email'],
+        usertype=request.json.get('usertype', ""),
+        password=request.json.get('password', ""),
+    )
+        
+    existing_user = User.query.filter_by(email=user.email).first()
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    try:
+        if user.usertype != "":
+            existing_user.usertype = user.usertype
+        if user.password != "":
+            existing_user.password = encode_password(user.password)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occurred'}), 500
+    
+    return jsonify(existing_user.to_dict()), 201
 
 
 if __name__ == '__main__':
