@@ -216,6 +216,7 @@ class JobPosting(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'title': self.title,
             'location': self.location,
             'experience': self.experience,
             'salary': self.salary,
@@ -223,6 +224,13 @@ class JobPosting(db.Model):
             'company_id': self.company_id,
             'position': self.position,
             'views': self.views,
+        }
+        
+    def to_summerized_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'company_id': self.company_id,
         }
 
 class JobPostingKeyword(db.Model):

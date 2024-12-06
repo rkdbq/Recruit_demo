@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort, render_template
-from models.user import Company, db, User, JobPosting, Application
+from models.user import Company, db, User, JobPosting, Application, JobPostingKeyword
 
 import os, re, base64
 
@@ -148,7 +148,45 @@ def add_company():
 
 @app.route('/jobs', methods=['GET'])
 def get_jobs():
-    jobs = JobPosting.query.all()
+    page = request.args.get('page', 1, type=int)
+    location = request.args.get('location', type=str)
+    experience = request.args.get('experience', type=str)
+    salary_min = request.args.get('salary_min', type=int)
+    salary_max = request.args.get('salary_max', type=int)
+    tech_stack = request.args.get('tech_stack', type=str)
+    company_id = request.args.get('company_id', type=int)
+    position = request.args.get('position', type=str)
+    keyword = request.args.get('keyword', type=str)  # 추가된 키워드 필터
+    sort_by = request.args.get('sort_by', 'id', type=str)  # 기본 정렬: id
+    sort_order = request.args.get('sort_order', 'asc', type=str)  # asc or desc
+    
+    query = JobPosting.query
+    
+    # 필터링
+    if location:
+        query = query.filter(JobPosting.location.ilike(f"%{location}%"))
+    if experience:
+        query = query.filter(JobPosting.experience.ilike(f"%{experience}%"))
+    if salary_min is not None:
+        query = query.filter(JobPosting.salary >= salary_min)
+    if salary_max is not None:
+        query = query.filter(JobPosting.salary <= salary_max)
+    if tech_stack:
+        query = query.filter(JobPosting.tech_stack.ilike(f"%{tech_stack}%"))
+    if company_id is not None:
+        query = query.filter(JobPosting.company_id == company_id)
+    if position:
+        query = query.filter(JobPosting.position.ilike(f"%{position}%"))
+    if keyword:
+        query = query.join(JobPostingKeyword).filter(JobPostingKeyword.keyword.ilike(f"%{keyword}%"))
+        
+    # 정렬
+    if sort_order.lower() == 'desc':
+        query = query.order_by(getattr(JobPosting, sort_by).desc())
+    else:
+        query = query.order_by(getattr(JobPosting, sort_by).asc())
+    
+    jobs = query.paginate(page=page, per_page=20, error_out=False)
     return jsonify([job.to_summerized_dict() for job in jobs])
 
 @app.route('/jobs/<int:job_id>', methods=['GET'])
@@ -189,6 +227,19 @@ def add_job():
         db.session.rollback()
         return jsonify({'error': 'Database error occured'}), 500
 
+    for keyword in request.json['keywords']:
+        job_posing_keyword = JobPostingKeyword(
+            job_posting_id=job_posting.id,
+            keyword=keyword,
+        )
+        try:
+            db.session.add(job_posing_keyword)
+            db.session.commit()
+        
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Database error occured'}), 500
+        
     return jsonify(job_posting.to_dict()), 201
 
 @app.route('/applications', methods=['POST'])
