@@ -149,7 +149,20 @@ def add_company():
 @app.route('/jobs', methods=['GET'])
 def get_jobs():
     jobs = JobPosting.query.all()
-    return jsonify([job.to_dict() for job in jobs])
+    return jsonify([job.to_summerized_dict() for job in jobs])
+
+@app.route('/jobs/<int:job_id>', methods=['GET'])
+def get_job_detail(job_id):
+    job = JobPosting.query.get(job_id)
+    try:
+        job.views += 1
+        db.session.commit()
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occured'}), 500
+    
+    return jsonify(job.to_dict())
 
 @app.route('/jobs', methods=['POST'])
 def add_job():
