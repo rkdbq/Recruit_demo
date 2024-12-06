@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify, abort, render_template
+from flask import Flask, request, jsonify, abort, render_template, g
 from models.user import Company, db, User, JobPosting, Application, JobPostingKeyword
 
-import os, re, base64
+import os, re, base64, jwt, datetime
+from functools import wraps
 
 # * 포트 포워딩 정보
 #   - 113.198.66.67:10xxx -> 10.0.0.xxx:8080
@@ -10,6 +11,8 @@ import os, re, base64
 #   - 113.198.66.67:18xxx -> 10.0.0.xxx:80
 #   - 113.198.66.67:19xxx -> 10.0.0.xxx:7777 (ssh)
 #   - 위 포트 외는 방화벽으로 차단되어 있습니다.
+
+SECRET_KEY = os.environ['SECRET_KEY']
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@localhost:3000/wsd3_db"
@@ -21,6 +24,34 @@ def create_tables():
     db.create_all()
     
 app.before_request(create_tables)
+
+def jwt_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = None
+        # 헤더에서 JWT 토큰 추출
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]  # "Bearer <token>"
+        
+        if not token:
+            return jsonify({'error': 'Token is missing'}), 401
+
+        try:
+            # 토큰 디코딩
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            # 인증된 사용자 정보 조회
+            user = User.query.filter_by(email=data['email']).first()
+            if not user:
+                return jsonify({'error': 'Invalid token'}), 401
+            # g 객체에 사용자 정보 저장
+            g.current_user = user
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token has expired'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Invalid token'}), 401
+
+        return f(*args, **kwargs)
+    return decorated_function
 
 # 이메일 형식 검증 함수
 def is_valid_email(email):
@@ -88,19 +119,19 @@ def delete_user(user_id):
     return jsonify({'message': f'User with ID {user_id} has been deleted'}), 200
 
 @app.route('/auth/profile', methods=['PUT'])
+@jwt_required
 def update_user():
-    if not request.json or not 'email' in request.json:
+    if not request.json:
         abort(400)
         
+    existing_user = g.current_user
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
     user = User(
-        email=request.json['email'],
         usertype=request.json.get('usertype', None),
         password=request.json.get('password', None),
     )
-        
-    existing_user = User.query.filter_by(email=user.email).first()
-    if not existing_user:
-        return jsonify({'error': 'User not found'}), 404
     
     try:
         if user.usertype:
@@ -113,6 +144,37 @@ def update_user():
         return jsonify({'error': 'Database error occurred'}), 500
     
     return jsonify(existing_user.to_dict()), 201
+
+@app.route('/auth/login', methods=['POST'])
+def login():
+    if not request.json or not 'email' in request.json:
+        abort(400)
+        
+    if not 'password' in request.json:
+        return jsonify({"error": "Username and password are required"}), 400
+        
+    existing_user = User.query.filter_by(email=request.json['email']).first()
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    user = User (
+        email=request.json['email'],
+        password=request.json['password'],
+    )
+    
+    if existing_user.password == encode_password(user.password):
+        token = jwt.encode(
+            {
+                "email": existing_user.email,
+                "usertype": existing_user.usertype,
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
+            },
+            SECRET_KEY,
+            algorithm="HS256",
+        )
+        return jsonify({"message": "Login successful", "token": token}), 200
+    else:
+        return jsonify({"error": "Invalid username or password"}), 401
 
 @app.route('/companies', methods=['GET'])
 def get_companies():
