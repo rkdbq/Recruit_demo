@@ -94,8 +94,8 @@ def update_user():
         
     user = User(
         email=request.json['email'],
-        usertype=request.json.get('usertype', ""),
-        password=request.json.get('password', ""),
+        usertype=request.json.get('usertype', None),
+        password=request.json.get('password', None),
     )
         
     existing_user = User.query.filter_by(email=user.email).first()
@@ -103,9 +103,9 @@ def update_user():
         return jsonify({'error': 'User not found'}), 404
     
     try:
-        if user.usertype != "":
+        if user.usertype:
             existing_user.usertype = user.usertype
-        if user.password != "":
+        if user.password:
             existing_user.password = encode_password(user.password)
         db.session.commit()
     except Exception as e:
@@ -129,10 +129,10 @@ def add_company():
         rep_name=request.json.get('rep_name', None),
         company_type=request.json['company_type'],
         industry=request.json['industry'],
-        employ_num=request.json['employ_num'],
-        est_date=request.json['est_date'],
-        homepage=request.json['homepage'],
-        address=request.json['address'],
+        employ_num=request.json.get('employ_num', None),
+        est_date=request.json.get('est_date', None),
+        homepage=request.json.get('homepage', None),
+        address=request.json.get('address', None),
     )
     
     # 채용 공고 저장
@@ -160,11 +160,11 @@ def add_job():
         title=request.json['title'],
         location=request.json['location'],
         experience=request.json['experience'],
-        salary=request.json['salary'],
-        tech_stack=request.json['tech_stack'],
+        salary=request.json.get('salary', None),
+        tech_stack=request.json.get('tech_stack', None),
         company_id=request.json['company_id'],
         position=request.json['position'],
-        views=request.json['views'],
+        views=request.json.get('views', None),
     )
     
     # 채용 공고 저장
@@ -188,7 +188,7 @@ def apply():
         user_id=request.json['user_id'],
         status=request.json['status'],
         applied_date=request.json['applied_date'],
-        resume=request.json.get('resume', "")
+        resume=request.json.get('resume', None)
     )
     
     existing_application = application.query.filter_by(job_posting_id=application.job_posting_id,

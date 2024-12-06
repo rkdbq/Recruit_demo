@@ -30,7 +30,7 @@ class Application(db.Model):
         지원 공고(FK -> 채용 공고 아이디): Int
         지원 상태: String
         지원 날짜: DateTime
-        첨부 이력서: String
+        첨부 이력서: String (null)
     """
     id = db.Column(db.Integer, primary_key=True)  # 지원 내역 아이디 (PK)
     job_posting_id = db.Column(db.Integer, db.ForeignKey('job_posting.id'), nullable=False)
@@ -194,18 +194,17 @@ class JobPosting(db.Model):
         제목: String
         지역: String
         경력: String
-        급여: String (null)
+        급여: Integer (null)
         기술스택: String (null)
         회사명(FK -> 회사 아이디): Integer
         포지션: String
         조회수: Integer
-        상세정보: Text
     """
     id = db.Column(db.Integer, primary_key=True)  # 공고 아이디 (PK)
     title = db.Column(db.String(50), nullable=False)
     location = db.Column(db.String(50), nullable=False)  # 지역
     experience = db.Column(db.String(50), nullable=False)  # 경력
-    salary = db.Column(db.String(50))  # 급여
+    salary = db.Column(db.Integer)  # 급여
     tech_stack = db.Column(db.String(200))  # 기술 스택
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)  # 회사명 (FK -> 회사 아이디)
     position = db.Column(db.String(50), nullable=False)  # 포지션
@@ -224,7 +223,6 @@ class JobPosting(db.Model):
             'company_id': self.company_id,
             'position': self.position,
             'views': self.views,
-            'details': self.details,
         }
 
 class JobPostingKeyword(db.Model):
