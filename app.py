@@ -481,6 +481,28 @@ def toggle_bookmark():
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': 'Database error occurred'}), 500
+        
+@app.route('/bookmarks', methods=['GET'])
+@jwt_required
+def get_bookmark():
+    existing_user = g.current_user
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+            
+    page = request.args.get('page', 1, type=int)
+    sort_by = request.args.get('sort_by', 'bookmarked_date', type=str)  # 기본 정렬: id
+    sort_order = request.args.get('sort_order', 'asc', type=str)  # asc or desc
+    
+    query = Bookmark.query.filter_by(user_id=existing_user.id)
+        
+    # 정렬
+    if sort_order.lower() == 'desc':
+        query = query.order_by(getattr(Bookmark, sort_by).desc())
+    else:
+        query = query.order_by(getattr(Bookmark, sort_by).asc())
+        
+    bookmarks = query.paginate(page=page, per_page=20, error_out=False)
+    return jsonify([bookmark.to_dict() for bookmark in bookmarks])
 
 if __name__ == '__main__':
     app.run(
