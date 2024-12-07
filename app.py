@@ -71,7 +71,7 @@ def get_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users])
 
-@app.route('/auth/profile', methods=['POST'])
+@app.route('/auth/register', methods=['POST'])
 def add_user():
     if not request.json or not 'email' in request.json:
         abort(400)
@@ -163,8 +163,9 @@ def login():
     )
     
     if existing_user.password == encode_password(user.password):
-        token = jwt.encode(
+        access_token = jwt.encode(
             {
+                "id": existing_user.id,
                 "email": existing_user.email,
                 "usertype": existing_user.usertype,
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
@@ -172,10 +173,58 @@ def login():
             SECRET_KEY,
             algorithm="HS256",
         )
-        return jsonify({"message": "Login successful", "token": token}), 200
+        refresh_token = jwt.encode(
+            {
+                "id": existing_user.id,
+                "email": existing_user.email,
+                "usertype": existing_user.usertype,
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
+            },
+            SECRET_KEY,
+            algorithm="HS256",
+        )
+        return jsonify({
+            "message": "Login successful", 
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            }), 200
     else:
         return jsonify({"error": "Invalid username or password"}), 401
-
+    
+@app.route('/auth/refresh', methods=['POST'])
+def refresh():
+    try:
+        refresh_token = request.json.get('refresh_token', None)
+        
+        if not refresh_token:
+            return jsonify({"error": "Refresh token is required"}), 400
+        
+        try:
+            decoded_token = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Refresh token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid refresh token"}), 401
+        
+        new_access_token = jwt.encode(
+            {
+                "id": decoded_token['id'],
+                "email": decoded_token['email'],
+                "usertype": decoded_token['usertype'],
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
+            },
+            SECRET_KEY,
+            algorithm="HS256",
+        )
+        
+        return jsonify({
+            "message": "Access token refreshed",
+            "access_token": new_access_token
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": "An error occurred", "details": str(e)}), 500
+        
 @app.route('/companies', methods=['GET'])
 def get_companies():
     companies = Company.query.all()
