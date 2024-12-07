@@ -62,14 +62,14 @@ def is_valid_email(email):
 def encode_password(password):
     return base64.b64encode(password.encode('utf-8')).decode('utf-8')
 
-@app.route("/")
-def home():
-    return "There is home"
+# @app.route("/")
+# def home():
+#     return "Server is online"
 
-@app.route('/auth', methods=['GET'])
-def get_users():
-    users = User.query.all()
-    return jsonify([user.to_dict() for user in users])
+# @app.route('/auth', methods=['GET'])
+# def get_users():
+#     users = User.query.all()
+#     return jsonify([user.to_dict() for user in users])
 
 @app.route('/auth/register', methods=['POST'])
 def add_user():
@@ -117,6 +117,19 @@ def delete_user(user_id):
         return jsonify({'error': 'Database error occurred'}), 500
 
     return jsonify({'message': f'User with ID {user_id} has been deleted'}), 200
+
+@app.route('/auth/profile', methods=['GET'])
+@jwt_required
+def get_user():
+    if not request.json:
+            abort(400)
+        
+    existing_user = g.current_user
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    user = User.query.get(existing_user.id)
+    return jsonify(user.to_dict())
 
 @app.route('/auth/profile', methods=['PUT'])
 @jwt_required
