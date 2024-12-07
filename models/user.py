@@ -39,9 +39,8 @@ class Application(db.Model):
     applied_date = db.Column(db.DateTime, nullable=False)  # 지원 날짜
     resume = db.Column(db.String(200))  # 첨부 이력서 (파일 경로 저장)
 
-    # 사용자 및 공고와의 관계 설정
+    # 사용자와의 관계 설정
     user = db.relationship('User', backref=db.backref('applications', lazy=True))
-    job_posting = db.relationship('JobPosting', backref=db.backref('applications', lazy=True))
     
     def to_dict(self):
         return {
@@ -66,7 +65,6 @@ class Bookmark(db.Model):
 
     # 사용자 및 공고와의 관계 설정
     user = db.relationship('User', backref=db.backref('bookmarks', lazy=True))
-    job_posting = db.relationship('JobPosting', backref=db.backref('bookmarks', lazy=True))
     
     def to_dict(self):
         return {
@@ -213,6 +211,10 @@ class JobPosting(db.Model):
     # 회사와의 관계 설정
     company = db.relationship('Company', backref=db.backref('job_postings', lazy=True))
     
+    keywords = db.relationship('JobPostingKeyword', backref='job_posting', cascade='all, delete-orphan')
+    applications = db.relationship('Application', backref='job_posting', cascade='all, delete-orphan')
+    bookmarks = db.relationship('Bookmark', backref='job_posting', cascade='all, delete-orphan')
+    
     def to_dict(self):
         return {
             'id': self.id,
@@ -242,9 +244,6 @@ class JobPostingKeyword(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # 공고 키워드 아이디 (PK)
     job_posting_id = db.Column(db.Integer, db.ForeignKey('job_posting.id'), nullable=False)  # 공고 아이디 (FK -> 공고 아이디)
     keyword = db.Column(db.String(50), nullable=False)  # 키워드
-
-    # 채용 공고와의 관계 설정
-    job_posting = db.relationship('JobPosting', backref=db.backref('keywords', lazy=True))
     
     def to_dict(self):
         return {

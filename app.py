@@ -329,7 +329,10 @@ def get_job_detail(job_id):
         db.session.rollback()
         return jsonify({'error': 'Database error occured'}), 500
     
-    return jsonify(job.to_dict())
+    job_data = job.to_dict()
+    job_data['keywords'] = [keyword.to_dict() for keyword in job.keywords]
+    
+    return jsonify(job_data)
 
 @app.route('/jobs', methods=['POST'])
 def add_job():
@@ -400,6 +403,25 @@ def update_job(id):
         return jsonify({'error': 'Database error occured'}), 500
         
     return jsonify(existing_job_posting.to_dict()), 201
+
+@app.route('/jobs/<int:id>', methods=['DELETE'])
+def delete_job(id):
+    if not request.json:
+        abort(400)
+        
+    job_posting = JobPosting.query.get(id)
+    if not job_posting:
+        return jsonify({'error': 'Job Posting not found'}), 404
+    
+    try:
+        db.session.delete(job_posting)
+        db.session.commit()
+        
+    except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Database error occurred'}), 500
+    
+    return jsonify({'message': f'Job Posting with ID {job_posting.id} has been deleted'}), 200 
 
 @app.route('/applications', methods=['POST'])
 @jwt_required
