@@ -103,9 +103,14 @@ def add_user():
 
     return jsonify(user.to_dict()), 201
 
-@app.route('/auth/<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    user = User.query.get(user_id)
+@app.route('/auth', methods=['DELETE'])
+@jwt_required
+def delete_user():
+    existing_user = g.current_user
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    user = User.query.get(existing_user.id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
@@ -116,7 +121,7 @@ def delete_user(user_id):
         db.session.rollback()
         return jsonify({'error': 'Database error occurred'}), 500
 
-    return jsonify({'message': f'User with ID {user_id} has been deleted'}), 200
+    return jsonify({'message': f'User with ID {user.id} has been deleted'}), 200
 
 @app.route('/auth/profile', methods=['GET'])
 @jwt_required
@@ -141,16 +146,16 @@ def update_user():
     if not existing_user:
         return jsonify({'error': 'User not found'}), 404
     
-    user = User(
+    new_user = User(
         usertype=request.json.get('usertype', None),
         password=request.json.get('password', None),
     )
     
     try:
-        if user.usertype:
-            existing_user.usertype = user.usertype
-        if user.password:
-            existing_user.password = encode_password(user.password)
+        if new_user.usertype:
+            existing_user.usertype = new_user.usertype
+        if new_user.password:
+            existing_user.password = encode_password(new_user.password)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -365,6 +370,36 @@ def add_job():
             return jsonify({'error': 'Database error occured'}), 500
         
     return jsonify(job_posting.to_dict()), 201
+
+@app.route('/jobs/<int:id>', methods=['PUT'])
+def update_job(id):
+    existing_job_posting = JobPosting.query.get(id)
+    if not existing_job_posting:
+        return jsonify({'error': 'Job Posting not found'}), 404
+    
+    new_job_posting = JobPosting(
+        title=request.json.get('title', None),
+        location=request.json.get('location', None),
+        experience=request.json.get('experience', None),
+        salary=request.json.get('salary', None),
+        tech_stack=request.json.get('tech_stack', None),
+        company_id=request.json.get('company_id', None),
+        position=request.json.get('position', None),
+        views=request.json.get('views', None),
+    )
+    
+    # 채용 공고 저장
+    try:
+        for (key, value) in new_job_posting.to_dict().items():
+            if value:
+                setattr(existing_job_posting, key, value)
+        db.session.commit() 
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occured'}), 500
+        
+    return jsonify(existing_job_posting.to_dict()), 201
 
 @app.route('/applications', methods=['POST'])
 @jwt_required
