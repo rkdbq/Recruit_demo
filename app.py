@@ -1,6 +1,6 @@
 from flask import Flask
 from models import db
-from apis import register_blueprints
+from controllers import register_blueprints
 
 # * 포트 포워딩 정보
 #   - 113.198.66.67:10xxx -> 10.0.0.xxx:8080

@@ -1,8 +1,8 @@
-from .company_api import company_bp
-from .job_posting_api import job_posting_bp
-from .auth_api import auth_bp
-from .application_api import application_bp
-from .bookmark_api import bookmark_bp
+from .company_controller import company_bp
+from .job_posting_controller import job_posting_bp
+from .auth_controller import auth_bp
+from .application_controller import application_bp
+from .bookmark_controller import bookmark_bp
 
 def register_blueprints(app):
     app.register_blueprint(company_bp, url_prefix='/companies')
