@@ -1,7 +1,10 @@
-from flask import Flask, request, jsonify, abort, render_template, g
-from models.user import Bookmark, Company, db, User, JobPosting, Application, JobPostingKeyword
+from flask import Flask, request, jsonify, abort, g
+from models import db
+from models.user_model import User, Bookmark, Application
+from models.company_model import Company
+from models.job_posting_model import JobPosting, JobPostingKeyword
 
-import os, re, base64, jwt, datetime
+import re, base64, jwt, datetime
 from functools import wraps
 
 # * 포트 포워딩 정보
