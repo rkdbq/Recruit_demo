@@ -45,6 +45,7 @@ class Application(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'job_posting_id': self.job_posting_id,
             'user_id': self.user_id,
             'status': self.status,
             'applied_date': self.applied_date,
