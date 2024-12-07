@@ -12,11 +12,8 @@ from functools import wraps
 #   - 113.198.66.67:19xxx -> 10.0.0.xxx:7777 (ssh)
 #   - 위 포트 외는 방화벽으로 차단되어 있습니다.
 
-SECRET_KEY = os.environ['SECRET_KEY']
-
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@localhost:3000/wsd3_db"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config.from_object('config.Config')
 
 db.init_app(app)
 
@@ -38,7 +35,7 @@ def jwt_required(f):
 
         try:
             # 토큰 디코딩
-            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
             # 인증된 사용자 정보 조회
             user = User.query.filter_by(email=data['email']).first()
             if not user:
@@ -188,7 +185,7 @@ def login():
                 "usertype": existing_user.usertype,
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
             },
-            SECRET_KEY,
+            app.config['SECRET_KEY'],
             algorithm="HS256",
         )
         refresh_token = jwt.encode(
@@ -198,7 +195,7 @@ def login():
                 "usertype": existing_user.usertype,
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
             },
-            SECRET_KEY,
+            app.config['SECRET_KEY'],
             algorithm="HS256",
         )
         return jsonify({
@@ -218,7 +215,7 @@ def refresh():
             return jsonify({"error": "Refresh token is required"}), 400
         
         try:
-            decoded_token = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
+            decoded_token = jwt.decode(refresh_token, app.config['SECRET_KEY'], algorithms=["HS256"])
         except jwt.ExpiredSignatureError:
             return jsonify({"error": "Refresh token has expired"}), 401
         except jwt.InvalidTokenError:
@@ -231,7 +228,7 @@ def refresh():
                 "usertype": decoded_token['usertype'],
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
             },
-            SECRET_KEY,
+            app.config['SECRET_KEY'],
             algorithm="HS256",
         )
         
