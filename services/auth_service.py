@@ -1,5 +1,4 @@
-import base64
-import re
+import base64, re
 
 # 이메일 형식 검증 함수
 def is_valid_email(email):

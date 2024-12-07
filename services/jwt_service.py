@@ -1,6 +1,4 @@
-import datetime
-import os
-import jwt
+import datetime, os, jwt
 from functools import wraps
 from flask import g, jsonify, request
 from models.user_model import User

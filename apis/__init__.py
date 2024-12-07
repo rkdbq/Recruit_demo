@@ -1,4 +1,3 @@
-from flask import Blueprint
 from .company_api import company_bp
 from .job_posting_api import job_posting_bp
 from .auth_api import auth_bp
