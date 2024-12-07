@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort, render_template, g
-from models.user import Company, db, User, JobPosting, Application, JobPostingKeyword
+from models.user import Bookmark, Company, db, User, JobPosting, Application, JobPostingKeyword
 
 import os, re, base64, jwt, datetime
 from functools import wraps
@@ -443,6 +443,44 @@ def delete_application(id):
         return jsonify({'error': 'Database error occurred'}), 500
 
     return jsonify({'message': f'Application with ID {application.id} has been deleted'}), 200
+
+@app.route('/bookmarks', methods=['POST'])
+@jwt_required
+def toggle_bookmark():
+    existing_user = g.current_user
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    if not request.json or not 'job_posting_id' in request.json:
+        abort(400)
+            
+    new_bookmark = Bookmark(
+        user_id=existing_user.id,
+        job_posting_id=request.json['job_posting_id'],
+        bookmarked_date=datetime.datetime.now(),
+    )
+    
+    existing_bookmark = Bookmark.query.filter_by(job_posting_id=new_bookmark.job_posting_id,
+                                                       user_id=new_bookmark.user_id).first()
+    
+    bookmark = existing_bookmark
+    if not existing_bookmark:
+        bookmark = new_bookmark
+        try:
+            db.session.add(bookmark)
+            db.session.commit()
+            return jsonify(bookmark.to_dict()), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Database error occurred'}), 500
+    else:
+        try:
+            db.session.delete(bookmark)
+            db.session.commit()
+            return jsonify({'message': f'Bookmark with ID {bookmark.id} has been deleted'}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Database error occurred'}), 500
 
 if __name__ == '__main__':
     app.run(
