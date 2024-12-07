@@ -401,7 +401,7 @@ def get_applications():
         return jsonify({'error': 'User not found'}), 404
     
     page = request.args.get('page', 1, type=int)
-    status = request.args.get('status', "지원 완료", type=str)
+    status = request.args.get('status', type=str)
     sort_by = request.args.get('sort_by', 'id', type=str)  # 기본 정렬: id
     sort_order = request.args.get('sort_order', 'asc', type=str)  # asc or desc
     
@@ -419,6 +419,30 @@ def get_applications():
         
     applications = query.paginate(page=page, per_page=20, error_out=False)
     return jsonify([app.to_dict() for app in applications])
+
+@app.route('/applications/<int:id>', methods=['DELETE'])
+@jwt_required
+def delete_application(id):
+    existing_user = g.current_user
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    application = Application.query.filter_by(id=id,
+                                              user_id=existing_user.id).first()
+    if not application:
+        return jsonify({'error': 'Application not found'}), 404
+
+    try:
+        if application.status == "지원 취소":
+            return jsonify({'error': f'Application with Id {application.id} is already canceled'}), 409
+        application.status = "지원 취소"
+        db.session.commit()
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occurred'}), 500
+
+    return jsonify({'message': f'Application with ID {application.id} has been deleted'}), 200
 
 if __name__ == '__main__':
     app.run(
