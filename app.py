@@ -354,23 +354,31 @@ def add_job():
     return jsonify(job_posting.to_dict()), 201
 
 @app.route('/applications', methods=['POST'])
+@jwt_required
 def apply():
+    existing_user = g.current_user
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
     if not request.json or not 'job_posting_id' in request.json:
         abort(400)
-        
-    application = Application(
+            
+    new_application = Application(
         job_posting_id=request.json['job_posting_id'],
-        user_id=request.json['user_id'],
-        status=request.json['status'],
-        applied_date=request.json['applied_date'],
+        user_id=existing_user.id,
+        status="지원 완료",
+        applied_date=datetime.datetime.now(),
         resume=request.json.get('resume', None)
     )
     
-    existing_application = application.query.filter_by(job_posting_id=application.job_posting_id,
-                                                       user_id=application.user_id).first()
+    existing_application = Application.query.filter_by(job_posting_id=new_application.job_posting_id,
+                                                       user_id=new_application.user_id).first()
+    
+    application = existing_application
     if not existing_application:
+        application = new_application
         try:
-            db.session.add(application)
+            db.session.add(new_application)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
@@ -383,7 +391,34 @@ def apply():
             db.session.rollback()
             return jsonify({'error': 'Database error occurred'}), 500
         
-    return jsonify(existing_application.to_dict()), 201
+    return jsonify(application.to_dict()), 201
+
+@app.route('/applications', methods=['GET'])
+@jwt_required
+def get_applications():
+    existing_user = g.current_user
+    if not existing_user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    page = request.args.get('page', 1, type=int)
+    status = request.args.get('status', "지원 완료", type=str)
+    sort_by = request.args.get('sort_by', 'id', type=str)  # 기본 정렬: id
+    sort_order = request.args.get('sort_order', 'asc', type=str)  # asc or desc
+    
+    query = Application.query.filter_by(user_id=existing_user.id)
+
+    # 필터링
+    if status:
+        query = query.filter(Application.status.ilike(f"%{status}%"))
+        
+    # 정렬
+    if sort_order.lower() == 'desc':
+        query = query.order_by(getattr(Application, sort_by).desc())
+    else:
+        query = query.order_by(getattr(Application, sort_by).asc())
+        
+    applications = query.paginate(page=page, per_page=20, error_out=False)
+    return jsonify([app.to_dict() for app in applications])
 
 if __name__ == '__main__':
     app.run(
