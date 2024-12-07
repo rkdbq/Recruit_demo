@@ -50,3 +50,14 @@ def generate_jwt_token(user, hours=None, days=None):
             SECRET_KEY,
             algorithm="HS256",
         )
+    
+def decode_jwt_token(token):
+    try:
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            
+    except jwt.ExpiredSignatureError:
+        return jsonify({'error': 'Token has expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid token'}), 401
+    
+    return decoded_token

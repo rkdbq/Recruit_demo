@@ -1,7 +1,7 @@
 from flask import abort, g, jsonify, Blueprint, request
 from models import db
 from models.user_model import User
-from services.jwt_service import jwt_required, generate_jwt_token
+from services.jwt_service import jwt_required, decode_jwt_token, generate_jwt_token
 from services.auth_service import encode_password, is_valid_email
 
 auth_bp = Blueprint('auth', __name__)
@@ -126,32 +126,27 @@ def login():
     else:
         return jsonify({"error": "Invalid username or password"}), 401
     
-# @auth_bp.route('/auth/refresh', methods=['POST'])
-# def refresh():
-#     try:
-#         refresh_token = request.json.get('refresh_token', None)
+@auth_bp.route('/refresh', methods=['POST'])
+def refresh():
+    try:
+        refresh_token = request.json.get('refresh_token', None)
         
-#         if not refresh_token:
-#             return jsonify({"error": "Refresh token is required"}), 400
+        if not refresh_token:
+            return jsonify({"error": "Refresh token is required"}), 400
         
-#         try:
-#             decoded_token = jwt.decode(refresh_token, app.config['SECRET_KEY'], algorithms=["HS256"])
-#         except jwt.ExpiredSignatureError:
-#             return jsonify({"error": "Refresh token has expired"}), 401
-#         except jwt.InvalidTokenError:
-#             return jsonify({"error": "Invalid refresh token"}), 401
+        decoded_token = decode_jwt_token(refresh_token)
         
-#         user = User(
-#             id=decoded_token['id'],
-#             email=decoded_token['email'],
-#             usertype=decoded_token['usertype'],
-#         )
-#         new_access_token = generate_jwt_token(user, hours=1)
+        user = User(
+            id=decoded_token['id'],
+            email=decoded_token['email'],
+            usertype=decoded_token['usertype'],
+        )
+        new_access_token = generate_jwt_token(user, hours=1)
         
-#         return jsonify({
-#             "message": "Access token refreshed",
-#             "access_token": new_access_token
-#         }), 200
+        return jsonify({
+            "message": "Access token refreshed",
+            "access_token": new_access_token
+        }), 200
         
-#     except Exception as e:
-#         return jsonify({"error": "An error occurred", "details": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": "An error occurred", "details": str(e)}), 500
