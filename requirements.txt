@@ -1,3 +1,4 @@
+aniso8601==9.0.1
 blinker @ file:///work/perseverance-python-buildout/croot/blinker_1698846408677/work
 cffi @ file:///croot/cffi_1726856441404/work
 click @ file:///work/perseverance-python-buildout/croot/click_1698845879718/work
@@ -9,8 +10,11 @@ itsdangerous @ file:///croot/itsdangerous_1716533337253/work
 Jinja2 @ file:///croot/jinja2_1730902924303/work
 MarkupSafe @ file:///work/perseverance-python-buildout/croot/markupsafe_1707342994941/work
 pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+PyJWT==2.10.1
 PyMySQL @ file:///work/perseverance-python-buildout/croot/pymysql_1698898635221/work
+pytz==2024.2
 setuptools==75.1.0
+six==1.17.0
 SQLAlchemy @ file:///croot/sqlalchemy_1725885050993/work
 typing_extensions @ file:///croot/typing_extensions_1715268824938/work
 Werkzeug @ file:///croot/werkzeug_1731005776056/work
