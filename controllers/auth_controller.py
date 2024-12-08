@@ -1,6 +1,7 @@
 from flask import g, Blueprint, request
 from models import db
 from models.user_model import User
+from models.blacklist_model import AccessToken
 from services.jwt_service import jwt_required, decode_jwt_token, generate_jwt_token
 from services.auth_service import encode_password, is_valid_email
 from views.response import json_response
@@ -165,21 +166,34 @@ def login():
 def refresh():
     try:
         refresh_token = request.json.get('refresh_token', None)
+        old_access_token = request.json.get('old_access_token', None)
         
-        if not refresh_token:
+        if not refresh_token or not old_access_token:
             return json_response(
                 code=400, 
                 args=request.args.to_dict(), 
-                message="Refresh token is required",
+                message="Refresh token and Old access token are required",
                 )
         
-        decoded_token = decode_jwt_token(refresh_token)
+        decoded_rt = decode_jwt_token(refresh_token)
+        decoded_old_at = decode_jwt_token(old_access_token)
         
         user = User(
-            id=decoded_token['id'],
-            email=decoded_token['email'],
-            usertype=decoded_token['usertype'],
+            id=decoded_rt['id'],
+            email=decoded_rt['email'],
+            usertype=decoded_rt['usertype'],
         )
+        
+        old_at = AccessToken(
+            jti=decoded_old_at['jti'],
+        )
+        
+        try:
+            db.session.add(old_at)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return json_response(code=500, args=request.args.to_dict())
 
         return json_response(
             code=200, 
