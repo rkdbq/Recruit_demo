@@ -1,9 +1,9 @@
 from flask import g, Blueprint, request
 from models import db
-from models.user_model import User
+from models.user_model import User, Log
 from models.blacklist_model import AccessToken
 from services.jwt_service import jwt_required, decode_jwt_token, generate_jwt_token
-from services.auth_service import encode_password, is_valid_email
+from services.auth_service import encode_password, is_valid_email, log_attempt
 from views.response import json_response
 
 auth_bp = Blueprint('auth', __name__)
@@ -126,10 +126,14 @@ def update_user():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    if not request.json or not 'email' in request.json:
-        return json_response(code=400, args=request.args.to_dict())
+    log = Log (
+        email=request.json.get('email', None),
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get('User-Agent'),
+    )
         
-    if not 'password' in request.json:
+    if not request.json or not 'email' in request.json or not 'password' in request.json:
+        log_attempt(log, request)
         return json_response(
             code=400, 
             args=request.args.to_dict(), 
@@ -138,6 +142,7 @@ def login():
         
     existing_user = User.query.filter_by(email=request.json['email']).first()
     if not existing_user:
+        log_attempt(log, request)
         return json_response(code=404, args=request.args.to_dict())
     
     user = User (
@@ -146,6 +151,9 @@ def login():
     )
     
     if existing_user.password == encode_password(user.password):
+        log.user_id = existing_user.id
+        log.status = "Success"
+        log_attempt(log, request)
         return json_response(
             code=200, 
             args=request.args.to_dict(), 
@@ -156,6 +164,7 @@ def login():
                 },
             )
     else:
+        log_attempt(log, request)
         return json_response(
             code=401, 
             args=request.args.to_dict(), 

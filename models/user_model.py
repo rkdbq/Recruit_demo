@@ -1,3 +1,4 @@
+import datetime
 from models import db
         
 class User(db.Model):
@@ -70,4 +71,27 @@ class Bookmark(db.Model):
             'user_id': self.user_id,
             'job_posting_id': self.job_posting_id,
             'bookmarked_date': self.bookmarked_date,
+        }
+
+class Log(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # 로그인 실패 시 user_id가 없을 수 있음
+    email = db.Column(db.String(50))
+    status = db.Column(db.String(50), default="Fail")
+    ip_address = db.Column(db.String(50), nullable=True)  # 클라이언트의 IP 주소
+    user_agent = db.Column(db.String(255), nullable=True)  # User-Agent 정보
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now)  # 로그인 시각
+    
+    user = db.relationship('User', backref=db.backref('logs', lazy=True))
+
+    def to_dict(self):
+        """로그인 로그를 딕셔너리로 반환"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'email': self.email,
+            'status': self.status,
+            'ip_address': self.ip_address,
+            'user_agent': self.user_agent,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         }
