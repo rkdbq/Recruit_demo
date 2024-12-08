@@ -1,8 +1,9 @@
 import datetime
-from flask import abort, g, jsonify, Blueprint, request
+from flask import g, Blueprint, request
 from models import db
 from models.user_model import Bookmark
 from services.jwt_service import jwt_required
+from views.response import json_response
 
 bookmark_bp = Blueprint('bookmark', __name__)
 
@@ -11,10 +12,10 @@ bookmark_bp = Blueprint('bookmark', __name__)
 def toggle_bookmark():
     existing_user = g.current_user
     if not existing_user:
-        return jsonify({'error': 'User not found'}), 404
+        return json_response(code=404, args=request.args.to_dict())
     
     if not request.json or not 'job_posting_id' in request.json:
-        abort(400)
+        json_response(code=400, args=request.args.to_dict())
             
     new_bookmark = Bookmark(
         user_id=existing_user.id,
@@ -31,25 +32,33 @@ def toggle_bookmark():
         try:
             db.session.add(bookmark)
             db.session.commit()
-            return jsonify(bookmark.to_dict()), 201
+            return json_response(
+                code=201, 
+                args=request.args.to_dict(), 
+                data=[bookmark.to_dict()],
+                )
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Database error occurred'}), 500
+            return json_response(code=500, args=request.args.to_dict())
     else:
         try:
             db.session.delete(bookmark)
             db.session.commit()
-            return jsonify({'message': f'Bookmark with ID {bookmark.id} has been deleted'}), 200
+            return json_response(
+                code=200, 
+                args=request.args.to_dict(), 
+                message=f"Bookmark with ID {bookmark.id} has been deleted",
+                )
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Database error occurred'}), 500
+            return json_response(code=500, args=request.args.to_dict())
         
 @bookmark_bp.route('/', methods=['GET'])
 @jwt_required
 def get_bookmark():
     existing_user = g.current_user
     if not existing_user:
-        return jsonify({'error': 'User not found'}), 404
+        return json_response(code=404, args=request.args.to_dict())
             
     page = request.args.get('page', 1, type=int)
     sort_by = request.args.get('sort_by', 'bookmarked_date', type=str)  # 기본 정렬: id
@@ -64,4 +73,8 @@ def get_bookmark():
         query = query.order_by(getattr(Bookmark, sort_by).asc())
         
     bookmarks = query.paginate(page=page, per_page=20, error_out=False)
-    return jsonify([bookmark.to_dict() for bookmark in bookmarks])
+    return json_response(
+        code=200, 
+        args=request.args.to_dict(), 
+        data=[bookmark.to_dict() for bookmark in bookmarks],
+        )

@@ -1,18 +1,23 @@
-from flask import abort, jsonify, Blueprint, request
+from flask import Blueprint, request
 from models import db
 from models.company_model import Company
+from views.response import json_response
 
 company_bp = Blueprint('company', __name__)
 
 @company_bp.route('/', methods=['GET'])
 def get_companies():
     companies = Company.query.all()
-    return jsonify([company.to_dict() for company in companies])
+    return json_response(
+        code=200, 
+        args=request.args.to_dict(), 
+        data=[company.to_dict() for company in companies],
+        )
 
 @company_bp.route('/', methods=['POST'])
 def add_company():
     if not request.json:
-        abort(400)
+        return json_response(code=400, args=request.args.to_dict())
 
     company = Company(
         company_name=request.json['company_name'],
@@ -32,6 +37,10 @@ def add_company():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Database error occured'}), 500
+        return json_response(code=500, args=request.args.to_dict())
 
-    return jsonify(company.to_dict()), 201
+    return json_response(
+        code=201, 
+        args=request.args.to_dict(), 
+        data=[company.to_dict()],
+        )

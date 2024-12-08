@@ -1,6 +1,7 @@
-from flask import abort, jsonify, Blueprint, request
+from flask import Blueprint, request
 from models import db
 from models.job_posting_model import JobPosting, JobPostingKeyword
+from views.response import json_response
 
 job_posting_bp = Blueprint('job_posting', __name__)
 
@@ -45,7 +46,12 @@ def get_jobs():
         query = query.order_by(getattr(JobPosting, sort_by).asc())
     
     jobs = query.paginate(page=page, per_page=20, error_out=False)
-    return jsonify([job.to_summerized_dict() for job in jobs])
+
+    return json_response(
+        code=200, 
+        args=request.args.to_dict(), 
+        data=[job.to_summerized_dict() for job in jobs],
+        )
 
 @job_posting_bp.route('/<int:job_id>', methods=['GET'])
 def get_job_detail(job_id):
@@ -56,17 +62,21 @@ def get_job_detail(job_id):
     
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Database error occured'}), 500
+        return json_response(code=500, args=request.args.to_dict())
     
     job_data = job.to_dict()
     job_data['keywords'] = [keyword.to_dict() for keyword in job.keywords]
     
-    return jsonify(job_data)
+    return json_response(
+            code=200, 
+            args=request.args.to_dict(), 
+            data=[job_data],
+            )
 
 @job_posting_bp.route('/', methods=['POST'])
 def add_job():
     if not request.json or not 'company_id' in request.json:
-        abort(400)
+        return json_response(code=400, args=request.args.to_dict())
 
     job_posting = JobPosting(
         title=request.json['title'],
@@ -86,7 +96,7 @@ def add_job():
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Database error occured'}), 500
+        return json_response(code=500, args=request.args.to_dict())
 
     for keyword in request.json['keywords']:
         job_posing_keyword = JobPostingKeyword(
@@ -99,15 +109,23 @@ def add_job():
         
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Database error occured'}), 500
+            return json_response(code=500, args=request.args.to_dict())
         
-    return jsonify(job_posting.to_dict()), 201
+    return json_response(
+        code=201, 
+        args=request.args.to_dict(), 
+        data=[job_posting.to_dict()],
+        )
 
 @job_posting_bp.route('/<int:id>', methods=['PUT'])
 def update_job(id):
     existing_job_posting = JobPosting.query.get(id)
     if not existing_job_posting:
-        return jsonify({'error': 'Job Posting not found'}), 404
+        return json_response(
+            code=404, 
+            args=request.args.to_dict(), 
+            message="Job Posting not found",
+            )
     
     new_job_posting = JobPosting(
         title=request.json.get('title', None),
@@ -129,18 +147,26 @@ def update_job(id):
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Database error occured'}), 500
+        return json_response(code=500, args=request.args.to_dict())
         
-    return jsonify(existing_job_posting.to_dict()), 201
+    return json_response(
+        code=201, 
+        args=request.args.to_dict(), 
+        data=[existing_job_posting.to_dict()],
+        )
 
 @job_posting_bp.route('/<int:id>', methods=['DELETE'])
 def delete_job(id):
     if not request.json:
-        abort(400)
+        json_response(code=400, args=request.args.to_dict())
         
     job_posting = JobPosting.query.get(id)
     if not job_posting:
-        return jsonify({'error': 'Job Posting not found'}), 404
+        return json_response(
+            code=404, 
+            args=request.args.to_dict(), 
+            message="Job Posting not found",
+            )
     
     try:
         db.session.delete(job_posting)
@@ -148,6 +174,10 @@ def delete_job(id):
         
     except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Database error occurred'}), 500
+            return json_response(code=500, args=request.args.to_dict())
     
-    return jsonify({'message': f'Job Posting with ID {job_posting.id} has been deleted'}), 200 
+    return json_response(
+        code=200, 
+        args=request.args.to_dict(), 
+        message=f"Job Posting with ID {job_posting.id} has been deleted",
+        )

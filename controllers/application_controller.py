@@ -1,8 +1,9 @@
 import datetime
-from flask import abort, g, jsonify, Blueprint, request
+from flask import g, Blueprint, request
 from models import db
 from models.user_model import Application
 from services.jwt_service import jwt_required
+from views.response import json_response
 
 application_bp = Blueprint('application', __name__)
 
@@ -11,10 +12,10 @@ application_bp = Blueprint('application', __name__)
 def apply():
     existing_user = g.current_user
     if not existing_user:
-        return jsonify({'error': 'User not found'}), 404
+        return json_response(code=404, args=request.args.to_dict())
     
     if not request.json or not 'job_posting_id' in request.json:
-        abort(400)
+        return json_response(code=400, args=request.args.to_dict())
             
     new_application = Application(
         job_posting_id=request.json['job_posting_id'],
@@ -35,23 +36,27 @@ def apply():
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Database error occurred'}), 500
+            return json_response(code=500, args=request.args.to_dict())
     elif existing_application.status == "지원 취소":
         try:
             existing_application.status = "지원 완료"
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            return jsonify({'error': 'Database error occurred'}), 500
-        
-    return jsonify(application.to_dict()), 201
+            return json_response(code=500, args=request.args.to_dict())
+
+    return json_response(
+        code=201, 
+        args=request.args.to_dict(), 
+        data=[application.to_dict()],
+        )
 
 @application_bp.route('/', methods=['GET'])
 @jwt_required
 def get_applications():
     existing_user = g.current_user
     if not existing_user:
-        return jsonify({'error': 'User not found'}), 404
+        return json_response(code=404, args=request.args.to_dict())
     
     page = request.args.get('page', 1, type=int)
     status = request.args.get('status', type=str)
@@ -71,28 +76,45 @@ def get_applications():
         query = query.order_by(getattr(Application, sort_by).asc())
         
     applications = query.paginate(page=page, per_page=20, error_out=False)
-    return jsonify([app.to_dict() for app in applications])
+    
+    return json_response(
+        code=200, 
+        args=request.args.to_dict(), 
+        data=[app.to_dict() for app in applications],
+        )
 
 @application_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required
 def delete_application(id):
     existing_user = g.current_user
     if not existing_user:
-        return jsonify({'error': 'User not found'}), 404
+        return json_response(code=404, args=request.args.to_dict())
     
     application = Application.query.filter_by(id=id,
                                               user_id=existing_user.id).first()
     if not application:
-        return jsonify({'error': 'Application not found'}), 404
+        return json_response(
+            code=404, 
+            args=request.args.to_dict(), 
+            message="Application not found",
+            )
 
     try:
         if application.status == "지원 취소":
-            return jsonify({'error': f'Application with Id {application.id} is already canceled'}), 409
+            return json_response(
+                code=409, 
+                args=request.args.to_dict(),
+                message=f"Application with Id {application.id} is already canceled",
+                )
         application.status = "지원 취소"
         db.session.commit()
             
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Database error occurred'}), 500
+        return json_response(code=500, args=request.args.to_dict())
 
-    return jsonify({'message': f'Application with ID {application.id} has been deleted'}), 200
+    return json_response(
+        code=200, 
+        args=request.args.to_dict(), 
+        message=f"Application with ID {application.id} has been deleted",
+        )
