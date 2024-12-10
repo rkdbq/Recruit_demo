@@ -1,5 +1,6 @@
 import datetime
 from flask import g, Blueprint, request
+from flasgger import swag_from
 from models import db
 from models.user_model import Bookmark
 from services.jwt_service import jwt_required
@@ -9,6 +10,7 @@ bookmark_bp = Blueprint('bookmark', __name__)
 
 @bookmark_bp.route('/', methods=['POST'])
 @jwt_required
+@swag_from('../api_docs/bookmark_apis/toggle_bookmark.yml')
 def toggle_bookmark():
     existing_user = g.current_user
     if not existing_user:
@@ -55,7 +57,8 @@ def toggle_bookmark():
         
 @bookmark_bp.route('/', methods=['GET'])
 @jwt_required
-def get_bookmark():
+@swag_from('../api_docs/bookmark_apis/get_bookmarks.yml')
+def get_bookmarks():
     existing_user = g.current_user
     if not existing_user:
         return json_response(code=404, args=request.args.to_dict())

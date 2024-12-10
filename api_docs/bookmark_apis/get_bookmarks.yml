@@ -1,0 +1,87 @@
+북마크 목록을 조회합니다.
+---
+tags:
+  - Bookmark
+description: "사용자가 저장한 북마크 목록을 조회합니다. 페이지네이션과 정렬 옵션을 제공합니다."
+parameters:
+  - in: query
+    name: page
+    type: integer
+    description: "페이지 번호 (기본값: 1)"
+    required: false
+    example: 1
+  - in: query
+    name: sort_by
+    type: string
+    description: "정렬할 속성 (기본값: bookmarked_date)"
+    required: false
+    example: "bookmarked_date"
+  - in: query
+    name: sort_order
+    type: string
+    description: "정렬 순서 ('asc' 또는 'desc', 기본값: 'asc')"
+    required: false
+    example: "asc"
+responses:
+  200:
+    description: "북마크 목록이 성공적으로 반환되었습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: "북마크 ID"
+                example: 1
+              user_id:
+                type: integer
+                description: "사용자 ID"
+                example: 1
+              job_posting_id:
+                type: integer
+                description: "채용 공고 ID"
+                example: 1
+              bookmarked_date:
+                type: string
+                description: "북마크 추가 날짜"
+                example: "2024-12-10T10:00:00"
+  404:
+    description: "사용자가 존재하지 않습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "User not found"
+  500:
+    description: "서버 오류가 발생했습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "Internal server error"
