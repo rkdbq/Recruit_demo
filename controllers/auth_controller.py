@@ -1,4 +1,5 @@
 from flask import g, Blueprint, request
+from flasgger import swag_from
 from models import db
 from models.user_model import User, Log
 from models.blacklist_model import AccessToken
@@ -9,6 +10,7 @@ from views.response import json_response
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/register', methods=['POST'])
+@swag_from('../api_docs/auth_apis/add_user.yml')
 def add_user():
     if not request.json or not 'email' in request.json:
         return json_response(code=400, args=request.args.to_dict())
@@ -54,6 +56,7 @@ def add_user():
 
 @auth_bp.route('/', methods=['DELETE'])
 @jwt_required
+@swag_from('../api_docs/auth_apis/delete_user.yml')
 def delete_user():
     existing_user = g.current_user
     if not existing_user:
@@ -78,6 +81,7 @@ def delete_user():
 
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required
+@swag_from('../api_docs/auth_apis/get_user.yml')
 def get_user():
     if not request.json:
         return json_response(code=400, args=request.args.to_dict()) 
@@ -95,6 +99,7 @@ def get_user():
 
 @auth_bp.route('/profile', methods=['PUT'])
 @jwt_required
+@swag_from('../api_docs/auth_apis/update_user.yml')
 def update_user():
     if not request.json:
         return json_response(code=400, args=request.args.to_dict())
@@ -125,6 +130,7 @@ def update_user():
         )
 
 @auth_bp.route('/login', methods=['POST'])
+@swag_from('../api_docs/auth_apis/login.yml')
 def login():
     log = Log (
         email=request.json.get('email', None),
@@ -172,6 +178,7 @@ def login():
             )
     
 @auth_bp.route('/refresh', methods=['POST'])
+@swag_from('../api_docs/auth_apis/refresh.yml')
 def refresh():
     try:
         refresh_token = request.json.get('refresh_token', None)
