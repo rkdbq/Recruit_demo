@@ -1,0 +1,143 @@
+---
+tags:
+  - Job Posting
+summary: "채용 공고를 추가합니다."
+description: "새로운 채용 공고와 연결된 키워드를 추가합니다."
+parameters:
+  - in: body
+    name: body
+    description: "채용 공고 정보를 포함하는 요청 본문"
+    required: true
+    schema:
+      type: object
+      properties:
+        title:
+          type: string
+          description: "채용 공고의 제목"
+          example: "Backend Developer at ABC Corp"
+        location:
+          type: string
+          description: "채용 공고의 위치"
+          example: "Seoul, South Korea"
+        experience:
+          type: string
+          description: "요구 경력"
+          example: "3+ years"
+        salary:
+          type: integer
+          description: "연봉"
+          example: 80000
+        tech_stack:
+          type: string
+          description: "필수 기술 스택"
+          example: "Python, Django"
+        company_id:
+          type: integer
+          description: "채용 공고와 연결된 회사의 ID"
+          example: 2
+        position:
+          type: string
+          description: "채용 포지션"
+          example: "Backend Developer"
+        views:
+          type: integer
+          description: "조회수 (초기값)"
+          example: 0
+        keywords:
+          type: array
+          items:
+            type: string
+          description: "채용 공고와 연결된 키워드 목록"
+          example: ["remote work", "full-time", "senior"]
+responses:
+  201:
+    description: "채용 공고가 성공적으로 생성되었습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: "채용 공고 ID"
+                example: 1
+              title:
+                type: string
+                description: "채용 공고 제목"
+                example: "Backend Developer at ABC Corp"
+              location:
+                type: string
+                description: "위치"
+                example: "Seoul, South Korea"
+              experience:
+                type: string
+                description: "필요 경력"
+                example: "3+ years"
+              salary:
+                type: integer
+                description: "연봉"
+                example: 80000
+              tech_stack:
+                type: string
+                description: "요구 기술 스택"
+                example: "Python, Django"
+              position:
+                type: string
+                description: "직책"
+                example: "Backend Developer"
+              views:
+                type: integer
+                description: "조회수"
+                example: 0
+              company_id:
+                type: integer
+                description: "소속 회사의 ID"
+                example: 2
+              description:
+                type: string
+                description: "채용 공고의 상세 설명"
+                example: "We are looking for a skilled Backend Developer..."
+              keywords:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: "키워드 ID"
+                      example: 10
+                    keyword:
+                      type: string
+                      description: "채용 공고에 연결된 키워드"
+                      example: "remote work"
+  400:
+    description: "요청 본문이 잘못되었습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+  500:
+    description: "서버 오류가 발생했습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"

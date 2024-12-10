@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from flasgger import swag_from
 from models import db
 from models.job_posting_model import JobPosting, JobPostingKeyword
 from views.response import json_response
@@ -6,6 +7,7 @@ from views.response import json_response
 job_posting_bp = Blueprint('job_posting', __name__)
 
 @job_posting_bp.route('/', methods=['GET'])
+@swag_from('../api_docs/job_posting_apis/get_jobs.yml')
 def get_jobs():
     page = request.args.get('page', 1, type=int)
     location = request.args.get('location', type=str)
@@ -54,6 +56,7 @@ def get_jobs():
         )
 
 @job_posting_bp.route('/<int:job_id>', methods=['GET'])
+@swag_from('../api_docs/job_posting_apis/get_job_detail.yml')
 def get_job_detail(job_id):
     job = JobPosting.query.get(job_id)
     try:
@@ -74,6 +77,7 @@ def get_job_detail(job_id):
             )
 
 @job_posting_bp.route('/', methods=['POST'])
+@swag_from('../api_docs/job_posting_apis/add_job.yml')
 def add_job():
     if not request.json or not 'company_id' in request.json:
         return json_response(code=400, args=request.args.to_dict())
@@ -118,6 +122,7 @@ def add_job():
         )
 
 @job_posting_bp.route('/<int:id>', methods=['PUT'])
+@swag_from('../api_docs/job_posting_apis/update_job.yml')
 def update_job(id):
     existing_job_posting = JobPosting.query.get(id)
     if not existing_job_posting:
@@ -156,6 +161,7 @@ def update_job(id):
         )
 
 @job_posting_bp.route('/<int:id>', methods=['DELETE'])
+@swag_from('../api_docs/job_posting_apis/delete_job.yml')
 def delete_job(id):
     if not request.json:
         json_response(code=400, args=request.args.to_dict())

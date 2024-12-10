@@ -1,0 +1,131 @@
+---
+tags:
+  - Job Posting
+summary: "채용 공고 목록을 조회합니다."
+description: "다양한 필터와 정렬 옵션을 사용하여 채용 공고 목록을 조회합니다."
+parameters:
+  - in: query
+    name: page
+    type: integer
+    description: "페이지 번호 (기본값: 1)"
+    required: false
+    example: 1
+  - in: query
+    name: location
+    type: string
+    description: "채용 공고의 위치로 필터링합니다."
+    required: false
+    example: "Seoul"
+  - in: query
+    name: experience
+    type: string
+    description: "필요한 경력 수준으로 필터링합니다."
+    required: false
+    example: "3 years"
+  - in: query
+    name: salary_min
+    type: integer
+    description: "최소 연봉으로 필터링합니다."
+    required: false
+    example: 50000
+  - in: query
+    name: salary_max
+    type: integer
+    description: "최대 연봉으로 필터링합니다."
+    required: false
+    example: 100000
+  - in: query
+    name: tech_stack
+    type: string
+    description: "기술 스택으로 필터링합니다."
+    required: false
+    example: "Python"
+  - in: query
+    name: company_id
+    type: integer
+    description: "특정 회사의 채용 공고만 조회합니다."
+    required: false
+    example: 1
+  - in: query
+    name: position
+    type: string
+    description: "채용 직책으로 필터링합니다."
+    required: false
+    example: "Backend Developer"
+  - in: query
+    name: keyword
+    type: string
+    description: "키워드를 기준으로 필터링합니다."
+    required: false
+    example: "remote"
+  - in: query
+    name: sort_by
+    type: string
+    description: "정렬할 속성 (기본값: id)"
+    required: false
+    example: "salary"
+  - in: query
+    name: sort_order
+    type: string
+    description: "정렬 순서 ('asc' 또는 'desc', 기본값: 'asc')"
+    required: false
+    example: "desc"
+responses:
+  200:
+    description: "채용 공고 목록이 성공적으로 반환되었습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: "채용 공고 ID"
+                example: 1
+              title:
+                type: string
+                description: "채용 공고 제목"
+                example: "Backend Developer at ABC Corp"
+              location:
+                type: string
+                description: "위치"
+                example: "Seoul, South Korea"
+              experience:
+                type: string
+                description: "필요 경력"
+                example: "3+ years"
+              salary:
+                type: integer
+                description: "연봉"
+                example: 80000
+              tech_stack:
+                type: string
+                description: "요구 기술 스택"
+                example: "Python, Django"
+              position:
+                type: string
+                description: "직책"
+                example: "Backend Developer"
+              views:
+                type: integer
+                description: "조회수"
+                example: 124
+  400:
+    description: "유효하지 않은 요청입니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        args:
+          type:
