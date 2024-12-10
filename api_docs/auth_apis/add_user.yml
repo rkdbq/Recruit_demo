@@ -38,20 +38,7 @@ responses:
         data:
           type: array
           items:
-            type: object
-            properties:
-              id:
-                type: integer
-                description: "사용자 ID"
-                example: 1
-              email:
-                type: string
-                description: "사용자 이메일"
-                example: "user@example.com"
-              usertype:
-                type: string
-                description: "사용자 유형"
-                example: "user"
+            $ref: '#/definitions/User'
   400:
     description: "유효하지 않은 요청입니다. 이메일이 올바르지 않거나 필수 정보가 부족합니다."
     schema:
@@ -97,3 +84,20 @@ responses:
           type: string
           description: "오류 메시지"
           example: "Internal server error"
+
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: "사용자 ID"
+        example: 1
+      email:
+        type: string
+        description: "사용자 이메일"
+        example: "user@example.com"
+      usertype:
+        type: string
+        description: "사용자 유형"
+        example: "user"

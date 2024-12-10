@@ -18,20 +18,7 @@ responses:
         data:
           type: array
           items:
-            type: object
-            properties:
-              id:
-                type: integer
-                description: "사용자 ID"
-                example: 1
-              email:
-                type: string
-                description: "사용자 이메일"
-                example: "user@example.com"
-              usertype:
-                type: string
-                description: "사용자 유형"
-                example: "admin"
+            $ref: '#/definitions/User'
   400:
     description: "잘못된 요청입니다."
     schema:
@@ -62,3 +49,20 @@ responses:
           type: string
           description: "오류 메시지"
           example: "User not found"
+
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: "사용자 ID"
+        example: 1
+      email:
+        type: string
+        description: "사용자 이메일"
+        example: "user@example.com"
+      usertype:
+        type: string
+        description: "사용자 유형"
+        example: "user"

@@ -1,27 +1,27 @@
-사용자 프로필 수정
+채용 공고에 지원
 ---
 tags:
-  - Auth
-description: "현재 인증된 사용자의 프로필 정보를 수정합니다. 인증된 사용자만 접근할 수 있습니다."
+  - Application
+description: "사용자가 채용 공고에 지원합니다. 이미 지원한 경우에는 지원 상태를 갱신합니다."
 parameters:
   - in: body
-    name: user
-    description: "수정할 사용자 정보"
+    name: application
+    description: "지원할 채용 공고의 ID와 사용자의 이력서(선택 사항)"
     required: true
     schema:
       type: object
       properties:
-        usertype:
+        job_posting_id:
+          type: integer
+          description: "지원할 채용 공고의 ID"
+          example: 1
+        resume:
           type: string
-          description: "사용자 유형"
-          example: "admin"
-        password:
-          type: string
-          description: "새로운 비밀번호"
-          example: "newpassword123"
+          description: "이력서 내용 (선택 사항)"
+          example: "my_resume.pdf"
 responses:
   200:
-    description: "사용자 프로필이 성공적으로 수정되었습니다."
+    description: "지원이 이미 취소된 경우, 지원 상태를 다시 '지원 완료'로 갱신합니다."
     schema:
       type: object
       properties:
@@ -34,9 +34,24 @@ responses:
         data:
           type: array
           items:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/Application'
+  201:
+    description: "새로운 지원이 성공적으로 추가되었습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        data:
+          type: array
+          items:
+            $ref: '#/definitions/Application'
   400:
-    description: "잘못된 요청입니다."
+    description: "유효하지 않은 요청입니다."
     schema:
       type: object
       properties:
@@ -51,7 +66,7 @@ responses:
           description: "오류 메시지"
           example: "Invalid request"
   404:
-    description: "사용자가 존재하지 않습니다."
+    description: "사용자가 존재하지 않거나 채용 공고 ID가 잘못되었습니다."
     schema:
       type: object
       properties:
@@ -82,18 +97,26 @@ responses:
           example: "Internal server error"
 
 definitions:
-  User:
+  Application:
     type: object
     properties:
       id:
         type: integer
+        description: "지원 ID"
+        example: 1
+      job_posting_id:
+        type: integer
+        description: "채용 공고 ID"
+        example: 1
+      user_id:
+        type: integer
         description: "사용자 ID"
         example: 1
-      email:
+      status:
         type: string
-        description: "사용자 이메일"
-        example: "user@example.com"
-      usertype:
+        description: "지원 상태"
+        example: "지원 완료"
+      applied_date:
         type: string
-        description: "사용자 유형"
-        example: "user"
+        description: "지원 날짜"
+        example: "2024-12-10T10:00:00"

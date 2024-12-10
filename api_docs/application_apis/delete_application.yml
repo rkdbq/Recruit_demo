@@ -1,27 +1,18 @@
-사용자 프로필 수정
+지원 취소
 ---
 tags:
-  - Auth
-description: "현재 인증된 사용자의 프로필 정보를 수정합니다. 인증된 사용자만 접근할 수 있습니다."
+  - Application
+description: "사용자가 지원한 채용 공고의 지원을 취소합니다."
 parameters:
-  - in: body
-    name: user
-    description: "수정할 사용자 정보"
+  - in: path
+    name: id
+    description: "취소할 지원의 ID"
     required: true
-    schema:
-      type: object
-      properties:
-        usertype:
-          type: string
-          description: "사용자 유형"
-          example: "admin"
-        password:
-          type: string
-          description: "새로운 비밀번호"
-          example: "newpassword123"
+    type: integer
+    example: 1
 responses:
   200:
-    description: "사용자 프로필이 성공적으로 수정되었습니다."
+    description: "지원이 성공적으로 취소되었습니다."
     schema:
       type: object
       properties:
@@ -31,12 +22,12 @@ responses:
         args:
           type: object
           description: "요청에 전달된 매개변수"
-        data:
-          type: array
-          items:
-            $ref: '#/definitions/User'
+        message:
+          type: string
+          description: "성공 메시지"
+          example: "Application with ID 1 has been deleted"
   400:
-    description: "잘못된 요청입니다."
+    description: "유효하지 않은 요청입니다."
     schema:
       type: object
       properties:
@@ -51,7 +42,7 @@ responses:
           description: "오류 메시지"
           example: "Invalid request"
   404:
-    description: "사용자가 존재하지 않습니다."
+    description: "지원 내역을 찾을 수 없습니다."
     schema:
       type: object
       properties:
@@ -64,7 +55,22 @@ responses:
         message:
           type: string
           description: "오류 메시지"
-          example: "User not found"
+          example: "Application not found"
+  409:
+    description: "지원이 이미 취소된 상태입니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 409
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "Application with Id 1 is already canceled"
   500:
     description: "서버 오류가 발생했습니다."
     schema:
@@ -80,20 +86,3 @@ responses:
           type: string
           description: "오류 메시지"
           example: "Internal server error"
-
-definitions:
-  User:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: "사용자 ID"
-        example: 1
-      email:
-        type: string
-        description: "사용자 이메일"
-        example: "user@example.com"
-      usertype:
-        type: string
-        description: "사용자 유형"
-        example: "user"

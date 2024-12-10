@@ -91,34 +91,14 @@ responses:
                 type: integer
                 description: "채용 공고 ID"
                 example: 1
+              company_id:
+                type: integer
+                description: "회사 ID"
+                example: 2
               title:
                 type: string
                 description: "채용 공고 제목"
                 example: "Backend Developer at ABC Corp"
-              location:
-                type: string
-                description: "위치"
-                example: "Seoul, South Korea"
-              experience:
-                type: string
-                description: "필요 경력"
-                example: "3+ years"
-              salary:
-                type: integer
-                description: "연봉"
-                example: 80000
-              tech_stack:
-                type: string
-                description: "요구 기술 스택"
-                example: "Python, Django"
-              position:
-                type: string
-                description: "직책"
-                example: "Backend Developer"
-              views:
-                type: integer
-                description: "조회수"
-                example: 124
   400:
     description: "유효하지 않은 요청입니다."
     schema:

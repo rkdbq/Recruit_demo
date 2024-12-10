@@ -1,5 +1,6 @@
 import datetime
 from flask import g, Blueprint, request
+from flasgger import swag_from
 from models import db
 from models.user_model import Application
 from services.jwt_service import jwt_required
@@ -9,6 +10,7 @@ application_bp = Blueprint('application', __name__)
 
 @application_bp.route('/', methods=['POST'])
 @jwt_required
+@swag_from('../api_docs/application_apis/apply.yml')
 def apply():
     existing_user = g.current_user
     if not existing_user:
@@ -53,6 +55,7 @@ def apply():
 
 @application_bp.route('/', methods=['GET'])
 @jwt_required
+@swag_from('../api_docs/application_apis/get_applications.yml')
 def get_applications():
     existing_user = g.current_user
     if not existing_user:
@@ -85,6 +88,7 @@ def get_applications():
 
 @application_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required
+@swag_from('../api_docs/application_apis/delete_application.yml')
 def delete_application(id):
     existing_user = g.current_user
     if not existing_user:
