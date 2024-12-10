@@ -1,7 +1,7 @@
+채용 공고를 수정합니다.
 ---
 tags:
   - Job Posting
-summary: "채용 공고를 수정합니다."
 description: "주어진 ID의 채용 공고를 수정합니다. 요청 본문에 포함된 값을 기준으로 해당 채용 공고를 업데이트합니다."
 parameters:
   - in: path

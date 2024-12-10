@@ -1,7 +1,7 @@
+모든 회사 목록을 조회합니다.
 ---
 tags:
   - Company
-summary: 모든 회사 목록을 조회합니다.
 description: 이 API는 모든 회사의 목록과 상세 정보를 조회합니다.
 produces:
   - application/json

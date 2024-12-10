@@ -1,7 +1,7 @@
+채용 공고를 추가합니다.
 ---
 tags:
   - Job Posting
-summary: "채용 공고를 추가합니다."
 description: "새로운 채용 공고와 연결된 키워드를 추가합니다."
 parameters:
   - in: body
