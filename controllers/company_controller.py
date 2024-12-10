@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from flasgger import swag_from
 from models import db
 from models.company_model import Company
 from views.response import json_response
@@ -6,6 +7,7 @@ from views.response import json_response
 company_bp = Blueprint('company', __name__)
 
 @company_bp.route('/', methods=['GET'])
+@swag_from('../api_docs/company_apis/get_companies.yml')
 def get_companies():
     companies = Company.query.all()
     return json_response(
@@ -15,6 +17,7 @@ def get_companies():
         )
 
 @company_bp.route('/', methods=['POST'])
+@swag_from('../api_docs/company_apis/add_company.yml')
 def add_company():
     if not request.json:
         return json_response(code=400, args=request.args.to_dict())

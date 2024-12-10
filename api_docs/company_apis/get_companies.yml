@@ -1,0 +1,65 @@
+---
+tags:
+  - Company
+summary: 모든 회사 목록을 조회합니다.
+description: 이 API는 모든 회사의 목록과 상세 정보를 조회합니다.
+produces:
+  - application/json
+responses:
+  200:
+    description: 회사 목록과 상세 정보를 반환합니다.
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        args:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            sort_by:
+              type: string
+              example: 'company_name'
+            sort_order:
+              type: string
+              example: 'asc'
+        data:
+          type: array
+          items:
+            $ref: '#/definitions/Company'
+
+definitions:
+  Company:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 5
+      company_name:
+        type: string
+        example: '테크코프'
+      rep_name:
+        type: string
+        example: '홍길동'
+      company_type:
+        type: string
+        example: '사기업'
+      industry:
+        type: string
+        example: '소프트웨어 개발'
+      employ_num:
+        type: integer
+        example: 100
+      est_date:
+        type: string
+        format: date-time
+        example: '2024-12-07T00:00:00Z'
+      homepage:
+        type: string
+        example: 'https://www.techcorp.com'
+      address:
+        type: string
+        example: '서울특별시 강남구 테크로 123'
