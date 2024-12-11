@@ -30,7 +30,7 @@ class Company(db.Model):
             'company_type': self.company_type,
             'industry': self.industry,
             'employ_num': self.employ_num,
-            'est_date': self.est_date,
+            'est_date': self.est_date.year if self.est_date else None,  # 연도만 반환
             'homepage': self.homepage,
             'address': self.address,
         }
