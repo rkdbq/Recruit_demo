@@ -9,7 +9,9 @@ company_bp = Blueprint('company', __name__)
 @company_bp.route('/', methods=['GET'])
 @swag_from('../api_docs/company_apis/get_companies.yml')
 def get_companies():
-    companies = Company.query.all()
+    page = request.args.get('page', 1, type=int)
+    companies = Company.query.paginate(page=page, per_page=20, error_out=False)
+    
     return json_response(
         code=200, 
         args=request.args.to_dict(), 
@@ -47,3 +49,29 @@ def add_company():
         args=request.args.to_dict(), 
         data=[company.to_dict()],
         )
+
+@company_bp.route('/<int:id>', methods=['DELETE'])
+@swag_from('../api_docs/company_apis/delete_company.yml')
+def delete_company(id):
+    company = Company.query.get(id)
+    
+    if not company:
+        return json_response(
+            code=404,
+            args=request.args.to_dict(),
+            message="Company not found",
+        )
+    
+    try:
+        db.session.delete(company)
+        db.session.commit()
+        
+    except Exception as e:
+        db.session.rollback()
+        return json_response(code=500, args=request.args.to_dict())
+    
+    return json_response(
+        code=200,
+        args=request.args.to_dict(),
+        message=f"Application with ID {company.id} has been deleted",
+    )

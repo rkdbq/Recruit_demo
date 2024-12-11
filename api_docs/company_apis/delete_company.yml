@@ -1,0 +1,54 @@
+회사 삭제
+---
+tags:
+  - Company
+description: "특정 회사를 삭제합니다."
+parameters:
+  - in: path
+    name: id
+    description: "삭제할 회사의 ID"
+    required: false
+    type: integer
+    example: 1
+responses:
+  200:
+    description: "회사가 성공적으로 삭제되었습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "성공 메시지"
+          example: "Company with ID 1 has been deleted"
+  400:
+    description: "유효하지 않은 요청입니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "Invalid request"
+  404:
+    description: "회사를 찾을 수 없습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        args:
+          type: object
+          description: "요청에 전달된 매개 변수"

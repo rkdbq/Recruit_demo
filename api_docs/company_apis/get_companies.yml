@@ -3,6 +3,13 @@
 tags:
   - Company
 description: 이 API는 모든 회사의 목록과 상세 정보를 조회합니다.
+parameters:
+  - in: query
+    name: page
+    type: integer
+    description: "페이지 번호 (기본값: 1)"
+    required: false
+    example: 1
 produces:
   - application/json
 responses:
