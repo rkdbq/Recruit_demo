@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flasgger import swag_from
 from models import db
-from models.job_posting_model import JobPosting, JobPostingKeyword
+from models.job_posting_model import JobPosting, JobPostingKeyword, JobPostingSkill
 from views.response import json_response
 
 job_posting_bp = Blueprint('job_posting', __name__)
@@ -33,7 +33,7 @@ def get_jobs():
     if salary_max is not None:
         query = query.filter(JobPosting.salary <= salary_max)
     if tech_stack:
-        query = query.filter(JobPosting.tech_stack.ilike(f"%{tech_stack}%"))
+        query = query.join(JobPostingSkill).filter(JobPostingSkill.skill.ilike(f"%{tech_stack}%"))
     if company_id is not None:
         query = query.filter(JobPosting.company_id == company_id)
     if position:
@@ -69,6 +69,7 @@ def get_job_detail(job_id):
     
     job_data = job.to_dict()
     job_data['keywords'] = [keyword.to_dict() for keyword in job.keywords]
+    job_data['tech_stack'] = [skill.to_dict() for skill in job.skills]
     
     return json_response(
             code=200, 
@@ -87,7 +88,6 @@ def add_job():
         location=request.json['location'],
         experience=request.json['experience'],
         salary=request.json.get('salary', None),
-        tech_stack=request.json.get('tech_stack', None),
         company_id=request.json['company_id'],
         position=request.json['position'],
         views=request.json.get('views', None),
@@ -109,6 +109,19 @@ def add_job():
         )
         try:
             db.session.add(job_posing_keyword)
+            db.session.commit()
+        
+        except Exception as e:
+            db.session.rollback()
+            return json_response(code=500, args=request.args.to_dict())
+        
+    for skill in request.json['tech_stack']:
+        job_posing_skill = JobPostingSkill(
+            job_posting_id=job_posting.id,
+            skill=skill,
+        )
+        try:
+            db.session.add(job_posing_skill)
             db.session.commit()
         
         except Exception as e:
@@ -137,7 +150,6 @@ def update_job(id):
         location=request.json.get('location', None),
         experience=request.json.get('experience', None),
         salary=request.json.get('salary', None),
-        tech_stack=request.json.get('tech_stack', None),
         company_id=request.json.get('company_id', None),
         position=request.json.get('position', None),
         views=request.json.get('views', None),
