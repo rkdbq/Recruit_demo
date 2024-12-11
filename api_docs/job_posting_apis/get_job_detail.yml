@@ -85,9 +85,18 @@ definitions:
         description: "연봉"
         example: 80000
       tech_stack:
-        type: string
-        description: "요구 기술 스택"
-        example: "Python, Django"
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: "키워드 ID"
+              example: 1
+            tech_stack:
+              type: string
+              description: "요구 기술 스택"
+              example: "python"
       position:
         type: string
         description: "직책"

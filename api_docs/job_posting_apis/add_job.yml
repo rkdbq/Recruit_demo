@@ -30,7 +30,7 @@ parameters:
         tech_stack:
           type: string
           description: "필수 기술 스택"
-          example: "Python, Django"
+          example: ["Python, Django"]
         company_id:
           type: integer
           description: "채용 공고와 연결된 회사의 ID"
@@ -86,10 +86,6 @@ responses:
                 type: integer
                 description: "연봉"
                 example: 80000
-              tech_stack:
-                type: string
-                description: "요구 기술 스택"
-                example: "Python, Django"
               position:
                 type: string
                 description: "직책"
