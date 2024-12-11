@@ -115,7 +115,7 @@ definitions:
       est_date:
         type: string
         format: date-time
-        example: '2024-12-07T00:00:00Z'
+        example: '2024'
       homepage:
         type: string
         example: 'https://www.techcorp.com'
