@@ -1,4 +1,3 @@
-import datetime
 import time, requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -13,13 +12,14 @@ options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple
 
 driver = webdriver.Chrome(options=options) 
 
-try:
-    # 순회할 URL 패턴 설정
-    base_url = 'https://www.wanted.co.kr/company/'
-    
-    for param in range(958, 10001):
-        url = f"{base_url}{param}"
-        print(f"{url}로 이동합니다.")
+def crawl_company(num):
+    try:
+        # 순회할 URL 패턴 설정
+        base_url = 'https://www.wanted.co.kr/company/'
+        
+        # for param in range(20001, 30001):
+        url = f"{base_url}{num}"
+        print(f"[회사 API] {url}로 이동합니다.")
         
         # 페이지 로드
         driver.get(url)
@@ -35,9 +35,8 @@ try:
                 company_name = driver.find_element(By.CLASS_NAME, 'wds-1n0snwn').text
                 company_info['회사명'] = company_name
                 
-                # address_element = driver.find_element(By.XPATH, "//span[@class='CompanyLocation_CompanyLocation__Address__m_0U5 wds-zw1m09']").text
-                # if address:
-                #     company_info['회사주소'] = address
+                address = driver.find_elements(By.CLASS_NAME, 'CompanyInfo_CompanyInfo__Text__oLsJ6.wds-ozue28')[1].text
+                company_info['회사주소'] = address
                 
                 for definition in definitions:
                     try:
@@ -47,7 +46,7 @@ try:
                         
                         company_info[key] = value
                     except Exception as e:
-                        print(f"정보 파싱 중 오류 발생: {e}")
+                        print(f"[회사 API] 정보 파싱 중 오류 발생: {e}")
                 
                 for key, value in company_info.items():
                     if value == '-':
@@ -78,25 +77,24 @@ try:
                         'employ_num': employ_num,
                         'est_date': est_date,
                         'homepage': company_info.get('홈페이지'),
-                        'address': company_info.get('회사주소')  # 주소 정보가 없으므로 None으로 설정
+                        'address': company_info.get('회사주소')
                     }
-                    print(payload)
                     response = requests.post(api_url, json=payload)
                     if response.status_code == 201:
-                        print(f"회사 정보 ({param})가 성공적으로 저장되었습니다.")
+                        print(f"[회사 API] ({num})가 성공적으로 저장되었습니다.")
                     else:
-                        print(f"회사 정보 ({param}) 저장 실패. 상태 코드: {response.status_code}")
+                        print(f"[회사 API] ({num}) 저장 실패. 상태 코드: {response.status_code}")
                 except Exception as e:
-                    print(f"API 요청 중 오류 발생: {e}")
+                    print(f"[회사 API] 요청 중 오류 발생: {e}")
             else:
-                print(f"{url}에서 CompanyInfoTable이 없습니다.")
+                print(f"[회사 API] {url}에서 CompanyInfoTable이 없습니다.")
                 
         except Exception as e:
-            print(f"{url}에서 정보 파싱 중 오류 발생: {e}")
+            print(f"[회사 API] {url}에서 정보 파싱 중 오류 발생: {e}")
 
-except Exception as e:
-    print(f"오류 발생: {e}")
+    except Exception as e:
+        print(f"[회사 API] 오류 발생: {e}")
 
-finally:
-    # 브라우저 닫기
-    driver.quit()
+    finally:
+        # 브라우저 닫기
+        driver.quit()
