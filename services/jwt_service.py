@@ -66,13 +66,12 @@ def generate_jwt_token(user, hours=None, days=None):
         exp += datetime.timedelta(hours=1)
     elif days:
         exp += datetime.timedelta(days=1)
-        
     return jwt.encode(
             {
                 "id": user.id,
                 "email": user.email,
                 "usertype": user.usertype,
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1),
+                "exp": exp,
                 "jti": generate_jti()
             },
             SECRET_KEY,
