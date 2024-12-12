@@ -46,6 +46,12 @@ def apply():
         except Exception as e:
             db.session.rollback()
             return json_response(code=500, args=request.args.to_dict())
+    else:
+        return json_response(
+            code=409, 
+            args=request.args.to_dict(),
+            message=f"Application with Id {application.id} is already applied",
+        )
 
     return json_response(
         code=201, 
