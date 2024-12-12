@@ -1,0 +1,124 @@
+새로운 회사 정보를 추가합니다.
+---
+tags:
+  - Company
+description: 클라이언트가 제공한 데이터를 기반으로 새로운 회사 정보를 추가합니다.
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters:
+  - name: body
+    in: body
+    required: true
+    description: 추가할 회사의 정보
+    schema:
+      type: object
+      properties:
+        company_name:
+          type: string
+          example: '테크코프'
+          description: 회사명 (필수)
+        rep_name:
+          type: string
+          example: '홍길동'
+          description: 대표자명 (선택)
+        company_type:
+          type: string
+          example: '사기업'
+          description: 회사 유형 (필수)
+        industry:
+          type: string
+          example: '소프트웨어 개발'
+          description: 산업 분야 (필수)
+        employ_num:
+          type: integer
+          example: 100
+          description: 직원 수 (선택)
+        est_date:
+          type: string
+          format: date-time
+          example: '2024-12-07'
+          description: 설립일 (선택)
+        homepage:
+          type: string
+          example: 'https://www.techcorp.com'
+          description: 회사 홈페이지 URL (선택)
+        address:
+          type: string
+          example: '서울특별시 강남구 테크로 123'
+          description: 회사 주소 (선택)
+responses:
+  201:
+    description: 회사가 성공적으로 추가되었습니다.
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 201
+        args:
+          type: object
+          properties:
+            company_name:
+              type: string
+              example: '테크코프'
+        data:
+          type: array
+          items:
+            $ref: '#/definitions/Company'
+  400:
+    description: 요청에 필요한 매개변수가 누락되었거나 유효하지 않습니다.
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: '잘못된 요청 매개변수입니다.'
+  500:
+    description: 서버 내부 오류가 발생했습니다.
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        message:
+          type: string
+          example: '서버 내부 오류가 발생했습니다.'
+
+definitions:
+  Company:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 5
+      company_name:
+        type: string
+        example: '테크코프'
+      rep_name:
+        type: string
+        example: '홍길동'
+      company_type:
+        type: string
+        example: '사기업'
+      industry:
+        type: string
+        example: '소프트웨어 개발'
+      employ_num:
+        type: integer
+        example: 100
+      est_date:
+        type: string
+        format: date-time
+        example: '2024'
+      homepage:
+        type: string
+        example: 'https://www.techcorp.com'
+      address:
+        type: string
+        example: '서울특별시 강남구 테크로 123'

@@ -1,0 +1,121 @@
+사용자의 지원 내역 조회
+---
+tags:
+  - Application
+description: "사용자가 지원한 채용 공고 내역을 조회합니다. 지원 상태에 따라 필터링하고, 정렬할 수 있습니다."
+parameters:
+  - name: Authorization
+    in: header
+    type: string
+    required: true
+    description: "JWT 토큰을 Bearer 스키마로 제공합니다. 예: 'Bearer {token}'"
+  - in: query
+    name: status
+    description: "지원 상태 필터링 (예: '지원 완료', '지원 취소')"
+    required: false
+    type: string
+    example: "지원 완료"
+  - in: query
+    name: page
+    description: "페이지 번호 (기본값: 1)"
+    required: false
+    type: integer
+    example: 1
+  - in: query
+    name: sort_by
+    description: "정렬 기준 (기본값: 'id')"
+    required: false
+    type: string
+    example: "applied_date"
+  - in: query
+    name: sort_order
+    description: "정렬 순서 ('asc' 또는 'desc', 기본값: 'asc')"
+    required: false
+    type: string
+    example: "desc"
+responses:
+  200:
+    description: "지원 내역이 성공적으로 조회되었습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        data:
+          type: array
+          items:
+            $ref: '#/definitions/Application'
+  400:
+    description: "유효하지 않은 요청입니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "Invalid request"
+  404:
+    description: "사용자가 존재하지 않거나 지원 내역을 찾을 수 없습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "User not found"
+  500:
+    description: "서버 오류가 발생했습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "Internal server error"
+
+definitions:
+  Application:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: "지원 ID"
+        example: 1
+      job_posting_id:
+        type: integer
+        description: "채용 공고 ID"
+        example: 1
+      user_id:
+        type: integer
+        description: "사용자 ID"
+        example: 1
+      status:
+        type: string
+        description: "지원 상태"
+        example: "지원 완료"
+      applied_date:
+        type: string
+        description: "지원 날짜"
+        example: "2024-12-10T10:00:00"

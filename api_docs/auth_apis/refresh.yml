@@ -1,0 +1,74 @@
+액세스 토큰 갱신
+---
+tags:
+  - Auth
+description: "사용자가 제공한 리프레시 토큰과 기존 액세스 토큰을 사용하여 새로운 액세스 토큰을 발급받습니다."
+parameters:
+  - in: body
+    name: refresh
+    description: "리프레시 토큰과 기존 액세스 토큰"
+    required: true
+    schema:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          description: "리프레시 토큰"
+          example: "your-refresh-token"
+        old_access_token:
+          type: string
+          description: "기존 액세스 토큰"
+          example: "your-old-access-token"
+responses:
+  200:
+    description: "액세스 토큰 갱신 성공"
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "성공 메시지"
+          example: "Access token refreshed"
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+              description: "새로운 액세스 토큰"
+              example: "your-new-access-token"
+  400:
+    description: "리프레시 토큰과 기존 액세스 토큰이 필요합니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "Refresh token and Old access token are required"
+  500:
+    description: "서버 오류가 발생했습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "Internal server error"

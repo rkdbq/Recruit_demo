@@ -1,0 +1,128 @@
+특정 채용 공고의 상세 정보를 조회합니다.
+---
+tags:
+  - Job Posting
+description: "채용 공고 ID에 해당하는 상세 정보를 조회하고 조회 수를 증가시킵니다."
+parameters:
+  - in: path
+    name: job_id
+    type: integer
+    description: "조회할 채용 공고의 고유 ID"
+    required: true
+    example: 1
+responses:
+  200:
+    description: "채용 공고 상세 정보가 성공적으로 반환되었습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        data:
+          type: array
+          items:
+            $ref: '#/definitions/Job'
+  400:
+    description: "유효하지 않은 요청입니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+  404:
+    description: "요청한 채용 공고를 찾을 수 없습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+  500:
+    description: "서버 오류가 발생했습니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 500
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+
+definitions:
+  Job:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: "채용 공고 ID"
+        example: 1
+      title:
+        type: string
+        description: "채용 공고 제목"
+        example: "Backend Developer at ABC Corp"
+      location:
+        type: string
+        description: "위치"
+        example: "Seoul, South Korea"
+      experience:
+        type: string
+        description: "필요 경력"
+        example: "3+ years"
+      salary:
+        type: integer
+        description: "연봉"
+        example: 80000
+      tech_stack:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: "키워드 ID"
+              example: 1
+            tech_stack:
+              type: string
+              description: "요구 기술 스택"
+              example: "python"
+      position:
+        type: string
+        description: "직책"
+        example: "Backend Developer"
+      views:
+        type: integer
+        description: "조회수"
+        example: 124
+      company_id:
+        type: integer
+        description: "소속 회사의 ID"
+        example: 2
+      description:
+        type: string
+        description: "채용 공고의 상세 설명"
+        example: "We are looking for a skilled Backend Developer..."
+      keywords:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: "키워드 ID"
+              example: 10
+            keyword:
+              type: string
+              description: "채용 공고에 연결된 키워드"
+              example: "remote work"
