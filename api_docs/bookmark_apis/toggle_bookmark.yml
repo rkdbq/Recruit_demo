@@ -4,6 +4,11 @@ tags:
   - Bookmark
 description: "사용자가 채용 공고를 북마크로 추가하거나 이미 추가된 북마크를 제거합니다."
 parameters:
+  - name: Authorization
+    in: header
+    type: string
+    required: true
+    description: "JWT 토큰을 Bearer 스키마로 제공합니다. 예: 'Bearer {token}'"
   - in: body
     name: job_posting_id
     description: "북마크로 추가하거나 제거할 채용 공고의 ID"

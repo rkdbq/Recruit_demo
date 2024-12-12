@@ -4,6 +4,11 @@ tags:
   - Bookmark
 description: "사용자가 저장한 북마크 목록을 조회합니다. 페이지네이션과 정렬 옵션을 제공합니다."
 parameters:
+  - name: Authorization
+    in: header
+    type: string
+    required: true
+    description: "JWT 토큰을 Bearer 스키마로 제공합니다. 예: 'Bearer {token}'"
   - in: query
     name: page
     type: integer
