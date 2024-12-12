@@ -83,9 +83,6 @@ def delete_user():
 @jwt_required
 @swag_from('../api_docs/auth_apis/get_user.yml')
 def get_user():
-    if not request.json:
-        return json_response(code=400, args=request.args.to_dict()) 
-        
     existing_user = g.current_user
     if not existing_user:
         return json_response(code=404, args=request.args.to_dict())
