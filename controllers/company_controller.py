@@ -10,7 +10,13 @@ company_bp = Blueprint('company', __name__)
 @swag_from('../api_docs/company_apis/get_companies.yml')
 def get_companies():
     page = request.args.get('page', 1, type=int)
-    companies = Company.query.paginate(page=page, per_page=20, error_out=False)
+    company_name = request.args.get('company_name', type=str)
+    
+    query = Company.query
+    
+    if company_name:
+        query = query.filter(Company.company_name.ilike(f"%{company_name}%"))
+    companies = query.paginate(page=page, per_page=20, error_out=False)
     
     return json_response(
         code=200, 
@@ -34,6 +40,14 @@ def add_company():
         homepage=request.json.get('homepage', None),
         address=request.json.get('address', None),
     )
+    
+    existing_company = Company.query.filter_by(company_name=company.company_name).first()
+    if existing_company:
+        return json_response(
+            code=409, 
+            args=request.args.to_dict(), 
+            message="Company already exists",
+        )
     
     # 채용 공고 저장
     try:

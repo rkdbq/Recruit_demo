@@ -93,6 +93,14 @@ def add_job():
         views=request.json.get('views', None),
     )
     
+    existing_job_posting = JobPosting.query.filter_by(title=job_posting.title).first()
+    if existing_job_posting:
+        return json_response(
+            code=409, 
+            args=request.args.to_dict(), 
+            message="Job Posting already exists",
+        )
+    
     # 채용 공고 저장
     try:
         db.session.add(job_posting)
