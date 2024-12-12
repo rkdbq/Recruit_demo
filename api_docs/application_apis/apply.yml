@@ -4,6 +4,11 @@ tags:
   - Application
 description: "사용자가 채용 공고에 지원합니다. 이미 지원한 경우에는 지원 상태를 갱신합니다."
 parameters:
+  - name: Authorization
+    in: header
+    type: string
+    required: true
+    description: "JWT 토큰을 Bearer 스키마로 제공합니다. 예: 'Bearer {token}'"
   - in: body
     name: application
     description: "지원할 채용 공고의 ID와 사용자의 이력서(선택 사항)"
@@ -80,6 +85,21 @@ responses:
           type: string
           description: "오류 메시지"
           example: "User not found"
+  409:
+    description: "이미 지원된 상태입니다."
+    schema:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 409
+        args:
+          type: object
+          description: "요청에 전달된 매개변수"
+        message:
+          type: string
+          description: "오류 메시지"
+          example: "Application with Id 1 is already applied"
   500:
     description: "서버 오류가 발생했습니다."
     schema:

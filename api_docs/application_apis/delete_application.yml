@@ -4,6 +4,11 @@ tags:
   - Application
 description: "사용자가 지원한 채용 공고의 지원을 취소합니다."
 parameters:
+  - name: Authorization
+    in: header
+    type: string
+    required: true
+    description: "JWT 토큰을 Bearer 스키마로 제공합니다. 예: 'Bearer {token}'"
   - in: path
     name: id
     description: "취소할 지원의 ID"
