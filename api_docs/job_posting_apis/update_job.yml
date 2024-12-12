@@ -46,14 +46,14 @@ parameters:
           description: "조회수"
           example: 124
 responses:
-  200:
+  201:
     description: "채용 공고가 성공적으로 수정되었습니다."
     schema:
       type: object
       properties:
         code:
           type: integer
-          example: 200
+          example: 201
         args:
           type: object
           description: "요청에 전달된 매개변수"
