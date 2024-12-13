@@ -1,5 +1,5 @@
 ## [Deploy Link](http://113.198.66.75:10164/)
-- [Swagger Docs](http://113.198.66.75:10164/apidocs/)
+- [API Docs](http://113.198.66.75:10164/apidocs/)
 
 ## 실행 방법
 
