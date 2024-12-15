@@ -8,6 +8,9 @@ pip install requirements.txt
 ```
 
 ### 환경변수 설정
+
+.env.example 참고
+
 ```
 export SECRET_KEY=<YOUR SECRET KEY TO JWT ENCODE>
 export DB_USER=<DB USER>
