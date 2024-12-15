@@ -1,3 +1,6 @@
+## [Deploy Link](http://113.198.66.75:10164/)
+- [API Docs](http://113.198.66.75:10164/apidocs/)
+
 ## 프로젝트 설치 및 실행 방법
 
 Python Version: 3.12.7
