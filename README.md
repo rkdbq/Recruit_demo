@@ -38,9 +38,9 @@ python app.py
 |--------|------------------------|----------------------|
 | DELETE | `/auth/`               | 사용자 삭제         |
 | POST   | `/auth/login`          | 사용자 로그인       |
-| GET    | `/auth/profile`        | 사용자 프리플 조회  |
-| PUT    | `/auth/profile`        | 사용자 프리플 수정  |
-| POST   | `/auth/refresh`        | 액세스 토큰 경시  |
+| GET    | `/auth/profile`        | 사용자 프로필 조회  |
+| PUT    | `/auth/profile`        | 사용자 프로필 수정  |
+| POST   | `/auth/refresh`        | 액세스 토큰 갱신  |
 | POST   | `/auth/register`       | 사용자 등록         |
 
 ### Bookmark
@@ -66,4 +66,4 @@ python app.py
 | POST   | `/jobs/`               | 채용 공고 추가       |
 | DELETE | `/jobs/{id}`           | 채용 공고 삭제     |
 | PUT    | `/jobs/{id}`           | 채용 공고 수정     |
-| GET    | `/jobs/{job_id}`       | 틀정 채용 공고 상세 정보 조회 |
+| GET    | `/jobs/{job_id}`       | 특정 채용 공고 상세 정보 조회 |
