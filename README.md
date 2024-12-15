@@ -70,3 +70,18 @@ python app.py
 | DELETE | `/jobs/{id}`           | 채용 공고 삭제     |
 | PUT    | `/jobs/{id}`           | 채용 공고 수정     |
 | GET    | `/jobs/{job_id}`       | 특정 채용 공고 상세 정보 조회 |
+
+## 크롤링 코드 실행 방법
+
+Python Version: 3.12.6
+
+### 패키지 설치
+```
+pip install requests
+pip install selenium
+```
+
+### 실행
+```
+python crawling_job_posting.py
+```
