@@ -18,7 +18,6 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'usertype': self.usertype,
-            'password': self.password,
         }
         
 class Application(db.Model):
